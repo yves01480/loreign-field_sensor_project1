@@ -44,32 +44,7 @@ char menu_items [NUM_ITEMS] [MAX_ITEM_LENGTH] = {
   {"Daily setting"}
 };
 
-void tiktokSetting(bool true_25 ,bool second_65 ,byte minutes_v ,byte seconds_v){
-  if (true_25==true){
-    display.setCursor(25, 50);
-    display.print(minutes_v);
-  }
 
-  if (second_65==true){
-    display.setCursor(65, 50);
-    display.print(seconds_v);
-
-}
-  else if(second_65==false){
-    display.setCursor(65, 50);
-    display.print("0");
-    display.setCursor(90, 50);
-    display.print(seconds_v);
-
-  }
-    display.setCursor(1, 50);
-    display.print("0");   
-    display.setCursor(50, 50);
-    display.print(":");
-    
-
-  }
-     
 
 void choosrModeSetting(int drawRectValue ,byte finalTimeValue_v){
   
@@ -370,43 +345,80 @@ for (unsigned long elapsedTime = 0; elapsedTime <= finalTimeValue_mins; elapsedT
   unsigned long minutes = remainingTime / (60 * 1000);
   unsigned long seconds = (remainingTime / 1000) % 60;
 
-  // if (digitalRead(BUTTON)==0 && !buttonPressed){
-  //   buttonPressed = true;
-  //   buttonPressStartTime = millis();
-  // }
+  if (digitalRead(BUTTON)==0 && !buttonPressed){
+    buttonPressed = true;
+    buttonPressStartTime = millis();
+  }
 
-  // else if (buttonPressed && (millis()-buttonPressStartTime>=3000)){
-  //   break;
-  //   buttonPressed =false;
-  // }
+  else if (buttonPressed==true && (millis()-buttonPressStartTime>=2000)){
+    break;
+   
+  }
 
   if (minutes < 10 && seconds < 10) {
     display.clearDisplay();
     bool setMin =true;
-    bool setSecond =false;
-    tiktokSetting(setMin,setSecond,minutes,seconds);
+    bool setSecond =true;
+    // tiktokSetting(setMin,setSecond,minutes,seconds);
+    display.setCursor(1, 50);
+    display.print("0");   
+    display.setCursor(25, 50);
+    display.print(minutes);
+    display.setCursor(50, 50);
+    display.print(":");
+    display.setCursor(65, 50);
+    display.print("0");
+    display.setCursor(90, 50);
+    display.print(seconds);
   } 
   
-  else if (minutes < 10) {
+  else if (minutes < 10 && seconds>10) {
     display.clearDisplay();
     bool setMin =true;
-    bool setSecond =true;
-    tiktokSetting(setMin,setSecond,minutes,seconds);
-  }
-    
-  else if (seconds < 10) {
-    display.clearDisplay();
-    bool setMin =false;
     bool setSecond =false;
-    tiktokSetting(setMin,setSecond,minutes,seconds);
+    // tiktokSetting(setMin,setSecond,minutes,seconds);
+    display.setCursor(1, 50);
+    display.print("0");   
+    display.setCursor(25, 50);
+    display.print(minutes);
+    display.setCursor(50, 50);
+    display.print(":");
+    display.setCursor(65, 50);
+    display.print(seconds);
+    Serial.println("In the minutes<10 situation.");
   }
 
-  
-  else {
-    bool setMin =false;
-    bool setSecond =true;
-    tiktokSetting(setMin,setSecond,minutes,seconds);
+  else if (minutes>=10 && seconds>10){
+    display.clearDisplay();
+    bool setMin = false;
+    bool setSecond = false;
+    // tiktokSetting(setMin,setSecond,minutes,seconds);
+    display.setCursor(1,50);
+    display.print(minutes);
+    display.setCursor(50, 50);
+    display.print(":");
+    display.setCursor(65, 50);
+    display.print(seconds);
+
   }
+  
+  else if(minutes>=10 && seconds<10){
+    display.clearDisplay();
+    bool setMin = false;
+    bool setSecond = true;
+    // tiktokSetting(setMin,setSecond,minutes,seconds);
+    display.setCursor(1,50);
+    display.print(minutes);
+    display.setCursor(50, 50);
+    display.print(":");
+    display.setCursor(65, 50);
+    display.print("0");
+    display.setCursor(90, 50);
+    display.print(seconds);
+ 
+  }
+  
+
 
   Serial.print("剩餘時間：");
   Serial.print(minutes);
@@ -422,7 +434,7 @@ for (unsigned long elapsedTime = 0; elapsedTime <= finalTimeValue_mins; elapsedT
   delay(1000);
 }
 
-  
+  buttonPressed =false;
   Serial.println("跳出迴圈、pump中止");
 
 
