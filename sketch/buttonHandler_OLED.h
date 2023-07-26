@@ -47,8 +47,8 @@ const int MAX_OPTION_LENGTH = 10;
 bool timeSetting = false;
 
 char menu_options [NUM_OPTIONS][MAX_OPTION_LENGTH] = {
-  {"daily set"},
-  {"reset"},
+  {"DAILY SET"},
+  {"RESET"},
   {"cancel"}
 };
 
@@ -59,6 +59,7 @@ char menu_items [NUM_ITEMS] [MAX_ITEM_LENGTH] = {
   {"Wifi"},
   {"Time setting"}
 };
+
 
 
 void optionSetting(byte count_v, byte previousValue_v, byte nextValue_v){
@@ -132,14 +133,14 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       if (count == 0){
         previousValue = arraySize-1;
         displaySetting(count,previousValue,nextValue);
+        
       }
 
       else if (count == 4){
       nextValue = 0;
       displaySetting(count,previousValue,nextValue);
       }
-      
- 
+    
       else{
       displaySetting(count,previousValue,nextValue);   
     }
@@ -162,6 +163,8 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
   //   timeSetting=false;
     
   //   }
+
+
 
   if(digitalRead(LED) ==HIGH && digitalRead(ENTER_BUTTON)==0 &&  timeCheckMode != true && timeSetting != true){
     
@@ -236,11 +239,11 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
        
         display.setTextColor(WHITE);     
         display.drawRect(0,20,128,23,WHITE);
-        display.setCursor(20,15); 
+        display.setCursor(5,15); 
         display.println(menu_options[0]);
-        display.setCursor(20,36);     
+        display.setCursor(5,37);     
         display.println(menu_options[1]);
-        display.setCursor(20,58);             
+        display.setCursor(5,57);             
         display.println(menu_options[2]);
         display.display();
         
@@ -253,6 +256,7 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
         break;
     }
   }
+
 
   if(timeSetting==true){
     buttonReady=true;
@@ -271,11 +275,11 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       display.clearDisplay();
        display.setTextColor(WHITE);     
         // display.drawRect(0,5,128,23,WHITE);
-        display.setCursor(20,15); 
+        display.setCursor(5,15); 
         display.println(menu_options[0]);
-        display.setCursor(20,36);     
+        display.setCursor(5,37);     
         display.println(menu_options[1]);
-        display.setCursor(20,58);             
+        display.setCursor(5,57);             
         display.println(menu_options[2]);
         display.display();
       Serial.print("count:");
@@ -289,286 +293,311 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       else if (count==2){
         display.drawRect(0,40,128,23,WHITE);
       }
-       display.display();
-      delay(100);
+    
+      display.display();
+      
       
   };  
-     
+    if(digitalRead(ENTER_BUTTON)==LOW){
+     switch(count){
+      case 0:
+      Serial.println(count);
+      break;
 
-      
+      case 1:
+      Serial.println(count);
+      break;
+
+      case 2:
+      Serial.println(count);
+      display.clearDisplay();
+      timeSetting = false;
+      count = 4 ;
+      previousValue = 3;
+      nextValue = 0;
+      buttonReady = false;
+      digitalWrite(LED,HIGH);
+      display.drawRect(0,20,128,23,WHITE);
+      displaySetting(count,previousValue,nextValue);
+      break;
+     }
+     display.display();
+    }
+    // timSetting
+    delay(10);
   };
 
 
-//   if(timeCheckMode==true){
+  if(timeCheckMode==true){
 
-//     previousMillis = millis();
-//     display.setFont(&FreeSansBoldOblique24pt7b);
-//     display.setTextSize(1); 
-
-
-//     if(digitalRead(BUTTON)==0 && digitalRead(LED)==HIGH){
-//       ten_digits_set = true;
-
-//       last_button_time = currentMillis;
-//       int ten_digitsSize = sizeof(ten_digits)/sizeof(ten_digits[0]);
-//       count_3 = (count_3 + 1) % ten_digitsSize;
-//       display.clearDisplay();
-//       display.setCursor(4,50);
-//       display.print(ten_digits[count_3]); 
-//       display.setCursor(30,50);
-//       display.print(digits[0]);
-//       display.setCursor(60,50);
-//       display.setFont(&FreeSansBold9pt7b);
-//       display.setTextSize(0);
-//       display.print("mins");
-//       display.display();
-//       Serial.println("十進位數據選擇");
-//     }
-
-//     //進入time Setting後直接按紅色按鈕
-//     else if(digitalRead(ENTER_BUTTON)==0 && digitalRead(LED)==HIGH && ten_digits_set ==false){
-//       confirmCount = 0;
-//       Serial.println("confirm 十進位數據");
-//       ten_digits_confirm = true;
-//       ten_digits_set = false;
-//       digitalWrite(LED,LOW);
-//       digits_choose_zero = false;
-//     }
+    previousMillis = millis();
+    display.setFont(&FreeSansBoldOblique24pt7b);
+    display.setTextSize(1); 
 
 
-//     else if (digitalRead(ENTER_BUTTON)==0 && ten_digits_set == true){
+    if(digitalRead(BUTTON)==0 && digitalRead(LED)==HIGH){
+      ten_digits_set = true;
+
+      last_button_time = currentMillis;
+      int ten_digitsSize = sizeof(ten_digits)/sizeof(ten_digits[0]);
+      count_3 = (count_3 + 1) % ten_digitsSize;
+      display.clearDisplay();
+      display.setCursor(4,50);
+      display.print(ten_digits[count_3]); 
+      display.setCursor(30,50);
+      display.print(digits[0]);
+      display.setCursor(60,50);
+      display.setFont(&FreeSansBold9pt7b);
+      display.setTextSize(0);
+      display.print("mins");
+      display.display();
+      Serial.println("十進位數據選擇");
+    }
+
+    //進入time Setting後直接按紅色按鈕
+    else if(digitalRead(ENTER_BUTTON)==0 && digitalRead(LED)==HIGH && ten_digits_set ==false){
+      confirmCount = 0;
+      Serial.println("confirm 十進位數據");
+      ten_digits_confirm = true;
+      ten_digits_set = false;
+      digitalWrite(LED,LOW);
+      digits_choose_zero = false;
+    }
+
+
+    else if (digitalRead(ENTER_BUTTON)==0 && ten_digits_set == true){
       
-//       confirmCount = count_3;
-//       Serial.println("confirm 十進位數據");
-//       ten_digits_confirm = true;
-//       ten_digits_set = false;
-//       digitalWrite(LED,LOW);
-//       digits_choose_zero = true;
-//     }
+      confirmCount = count_3;
+      Serial.println("confirm 十進位數據");
+      ten_digits_confirm = true;
+      ten_digits_set = false;
+      digitalWrite(LED,LOW);
+      digits_choose_zero = true;
+    }
 
       
-//     else if(digitalRead(BUTTON)==0 && ten_digits_confirm ==true && digitalRead(LED)==LOW){
-//       Serial.println("選擇個位數數據");
-//       last_button_time = currentMillis;
-//       int digitSize = sizeof(digits)/sizeof(digits[0]);
+    else if(digitalRead(BUTTON)==0 && ten_digits_confirm ==true && digitalRead(LED)==LOW){
+      Serial.println("選擇個位數數據");
+      last_button_time = currentMillis;
+      int digitSize = sizeof(digits)/sizeof(digits[0]);
       
-//       count_2 = (count_2 + 1) % digitSize;
-//       display.clearDisplay();
-//       display.setCursor(4,50);
-//       display.print(ten_digits[confirmCount]);
-//       display.setCursor(30,50); 
-//       display.print(digits[count_2]);
-//       display.setCursor(60,50);
-//       display.setFont(&FreeSansBold9pt7b);
-//       display.setTextSize(0);
-//       display.print("mins");
-//       display.display();
+      count_2 = (count_2 + 1) % digitSize;
+      display.clearDisplay();
+      display.setCursor(4,50);
+      display.print(ten_digits[confirmCount]);
+      display.setCursor(30,50); 
+      display.print(digits[count_2]);
+      display.setCursor(60,50);
+      display.setFont(&FreeSansBold9pt7b);
+      display.setTextSize(0);
+      display.print("mins");
+      display.display();
 
     
-//       digits_confirm = true;
-//       digits_choose_zero = false;
-//     }
+      digits_confirm = true;
+      digits_choose_zero = false;
+    }
 
-//     else if(digitalRead(ENTER_BUTTON)==0 && digits_choose_zero==true){
-//        last_button_time = currentMillis;
-//        confirmDigit = 0;
-//        int ten_digits_value = ten_digits[confirmCount]*10;
-//       finalTimeValue = ten_digits_value+digits[confirmDigit];
-//        Serial.println("confirm 個位數數據");
-//        chooseModeSetting(20,finalTimeValue);
-//        Serial.println(finalTimeValue);
-//        ten_digits_confirm = false;
-//        digits_confirm = false;
-//        chooseMode = false;
-//        digits_choose_zero=false;
+    else if(digitalRead(ENTER_BUTTON)==0 && digits_choose_zero==true){
+       last_button_time = currentMillis;
+       confirmDigit = 0;
+       int ten_digits_value = ten_digits[confirmCount]*10;
+      finalTimeValue = ten_digits_value+digits[confirmDigit];
+       Serial.println("confirm 個位數數據");
+       chooseModeSetting(20,finalTimeValue);
+       Serial.println(finalTimeValue);
+       ten_digits_confirm = false;
+       digits_confirm = false;
+       chooseMode = false;
+       digits_choose_zero=false;
        
-//     }
+    }
 
 
-//     else if(digitalRead(ENTER_BUTTON)==0 && digits_confirm==true){
-//       last_button_time = currentMillis;
-//       Serial.println("confirm 個位數數據");
-//       confirmDigit = count_2;
-//       int ten_digits_value = ten_digits[confirmCount]*10;
-//       finalTimeValue = ten_digits_value+digits[confirmDigit];
-//       chooseModeSetting(20,finalTimeValue);
-//       Serial.println(finalTimeValue);
-//       ten_digits_confirm = false;
-//       digits_confirm = false;
-//       chooseMode = false;
-//     }
+    else if(digitalRead(ENTER_BUTTON)==0 && digits_confirm==true){
+      last_button_time = currentMillis;
+      Serial.println("confirm 個位數數據");
+      confirmDigit = count_2;
+      int ten_digits_value = ten_digits[confirmCount]*10;
+      finalTimeValue = ten_digits_value+digits[confirmDigit];
+      chooseModeSetting(20,finalTimeValue);
+      Serial.println(finalTimeValue);
+      ten_digits_confirm = false;
+      digits_confirm = false;
+      chooseMode = false;
+    }
 
-//     else if(digitalRead(BUTTON)==0 && chooseMode==false){
-//       last_button_time = currentMillis;
-//       digits_confirm = false;
-//       ten_digits_confirm = false;
-//       chooseMode =true;
-//       chooseModeSetting(40,finalTimeValue);
-//       Serial.print("chooseMode:");
-//       Serial.println(chooseMode);
+    else if(digitalRead(BUTTON)==0 && chooseMode==false){
+      last_button_time = currentMillis;
+      digits_confirm = false;
+      ten_digits_confirm = false;
+      chooseMode =true;
+      chooseModeSetting(40,finalTimeValue);
+      Serial.print("chooseMode:");
+      Serial.println(chooseMode);
 
       
-//     }
+    }
 
 
-//     else if(digitalRead(BUTTON)==0 && chooseMode==true){
-//       last_button_time = currentMillis;
-//       digits_confirm = false;
-//       ten_digits_confirm = false;
-//       chooseMode = false;
-//       chooseModeSetting(20,finalTimeValue);
-//       Serial.print("chooseMode:");
-//       Serial.println(chooseMode);
+    else if(digitalRead(BUTTON)==0 && chooseMode==true){
+      last_button_time = currentMillis;
+      digits_confirm = false;
+      ten_digits_confirm = false;
+      chooseMode = false;
+      chooseModeSetting(20,finalTimeValue);
+      Serial.print("chooseMode:");
+      Serial.println(chooseMode);
 
-//     }
+    }
 
-//     //倒數計時開始
-// else if (digitalRead(ENTER_BUTTON) == 0 && chooseMode == false && timeCheckMode == true) {
+    //倒數計時開始
+else if (digitalRead(ENTER_BUTTON) == 0 && chooseMode == false && timeCheckMode == true) {
 
 
-//   waterPumpMode = true;
-//   unsigned long finalTimeValue_mins = finalTimeValue * 1000ULL * 60ULL;
-//   unsigned long startTime = millis();
+  waterPumpMode = true;
+  unsigned long finalTimeValue_mins = finalTimeValue * 1000ULL * 60ULL;
+  unsigned long startTime = millis();
 
   
-//     Serial.println("倒數計時：");
+    Serial.println("倒數計時：");
     
-//     unsigned long elapsedTime = 0;
-//     unsigned long passValue;
+    unsigned long elapsedTime = 0;
+    unsigned long passValue;
     
 
-// for (unsigned long elapsedTime = 0; elapsedTime <= finalTimeValue_mins; elapsedTime += 1000) {
-//   display.setTextSize(1);
-//   display.clearDisplay();
-//   display.setFont(&FreeSansBoldOblique24pt7b);
+for (unsigned long elapsedTime = 0; elapsedTime <= finalTimeValue_mins; elapsedTime += 1000) {
+  display.setTextSize(1);
+  display.clearDisplay();
+  display.setFont(&FreeSansBoldOblique24pt7b);
 
-//   unsigned long remainingTime = finalTimeValue_mins - elapsedTime;
-//   unsigned long minutes = remainingTime / (60 * 1000);
-//   unsigned long seconds = (remainingTime / 1000) % 60;
+  unsigned long remainingTime = finalTimeValue_mins - elapsedTime;
+  unsigned long minutes = remainingTime / (60 * 1000);
+  unsigned long seconds = (remainingTime / 1000) % 60;
 
-//   if (digitalRead(BUTTON)==0 && !buttonPressed){
-//     buttonPressed = true;
-//     buttonPressStartTime = millis();
-//   }
+  if (digitalRead(BUTTON)==0 && !buttonPressed){
+    buttonPressed = true;
+    buttonPressStartTime = millis();
+  }
 
-//   else if (buttonPressed==true && (millis()-buttonPressStartTime>=2000)){
-//     break;
+  else if (buttonPressed==true && (millis()-buttonPressStartTime>=2000)){
+    break;
    
-//   }
+  }
 
-//   if (minutes < 10 && seconds < 10) {
-//     display.clearDisplay();
-//     bool setMin =true;
-//     bool setSecond =true;
-//     // tiktokSetting(setMin,setSecond,minutes,seconds);
-//     display.setCursor(1, 50);
-//     display.print("0");   
-//     display.setCursor(25, 50);
-//     display.print(minutes);
-//     display.setCursor(50, 50);
-//     display.print(":");
-//     display.setCursor(65, 50);
-//     display.print("0");
-//     display.setCursor(90, 50);
-//     display.print(seconds);
-//   } 
+  if (minutes < 10 && seconds < 10) {
+    display.clearDisplay();
+    bool setMin =true;
+    bool setSecond =true;
+    // tiktokSetting(setMin,setSecond,minutes,seconds);
+    display.setCursor(1, 50);
+    display.print("0");   
+    display.setCursor(25, 50);
+    display.print(minutes);
+    display.setCursor(50, 50);
+    display.print(":");
+    display.setCursor(65, 50);
+    display.print("0");
+    display.setCursor(90, 50);
+    display.print(seconds);
+  } 
   
-//   else if (minutes < 10 && seconds>10) {
-//     display.clearDisplay();
-//     bool setMin =true;
-//     bool setSecond =false;
-//     // tiktokSetting(setMin,setSecond,minutes,seconds);
-//     display.setCursor(1, 50);
-//     display.print("0");   
-//     display.setCursor(25, 50);
-//     display.print(minutes);
-//     display.setCursor(50, 50);
-//     display.print(":");
-//     display.setCursor(65, 50);
-//     display.print(seconds);
-//     Serial.println("In the minutes<10 situation.");
-//   }
+  else if (minutes < 10 && seconds>10) {
+    display.clearDisplay();
+    bool setMin =true;
+    bool setSecond =false;
+    // tiktokSetting(setMin,setSecond,minutes,seconds);
+    display.setCursor(1, 50);
+    display.print("0");   
+    display.setCursor(25, 50);
+    display.print(minutes);
+    display.setCursor(50, 50);
+    display.print(":");
+    display.setCursor(65, 50);
+    display.print(seconds);
+    Serial.println("In the minutes<10 situation.");
+  }
 
-//   else if (minutes>=10 && seconds>10){
-//     display.clearDisplay();
-//     bool setMin = false;
-//     bool setSecond = false;
-//     // tiktokSetting(setMin,setSecond,minutes,seconds);
-//     display.setCursor(1,50);
-//     display.print(minutes);
-//     display.setCursor(50, 50);
-//     display.print(":");
-//     display.setCursor(65, 50);
-//     display.print(seconds);
+  else if (minutes>=10 && seconds>10){
+    display.clearDisplay();
+    bool setMin = false;
+    bool setSecond = false;
+    // tiktokSetting(setMin,setSecond,minutes,seconds);
+    display.setCursor(1,50);
+    display.print(minutes);
+    display.setCursor(50, 50);
+    display.print(":");
+    display.setCursor(65, 50);
+    display.print(seconds);
 
-//   }
+  }
   
-//   else if(minutes>=10 && seconds<10){
-//     display.clearDisplay();
-//     bool setMin = false;
-//     bool setSecond = true;
-//     // tiktokSetting(setMin,setSecond,minutes,seconds);
-//     display.setCursor(1,50);
-//     display.print(minutes);
-//     display.setCursor(50, 50);
-//     display.print(":");
-//     display.setCursor(65, 50);
-//     display.print("0");
-//     display.setCursor(90, 50);
-//     display.print(seconds);
+  else if(minutes>=10 && seconds<10){
+    display.clearDisplay();
+    bool setMin = false;
+    bool setSecond = true;
+    // tiktokSetting(setMin,setSecond,minutes,seconds);
+    display.setCursor(1,50);
+    display.print(minutes);
+    display.setCursor(50, 50);
+    display.print(":");
+    display.setCursor(65, 50);
+    display.print("0");
+    display.setCursor(90, 50);
+    display.print(seconds);
  
-//   }
+  }
   
 
 
-//   Serial.print("剩餘時間：");
-//   Serial.print(minutes);
-//   Serial.print(" 分 ");
-//   Serial.print(seconds);
-//   Serial.println(" 秒");
-//   Serial.print("elapsedTime:");
-//   Serial.println(elapsedTime);
-//   Serial.print("finalTimeValue_mins:");
-//   Serial.println(finalTimeValue_mins);
+  Serial.print("剩餘時間：");
+  Serial.print(minutes);
+  Serial.print(" 分 ");
+  Serial.print(seconds);
+  Serial.println(" 秒");
+  Serial.print("elapsedTime:");
+  Serial.println(elapsedTime);
+  Serial.print("finalTimeValue_mins:");
+  Serial.println(finalTimeValue_mins);
 
-//   display.display();
-//   delay(1000);
-// }
+  display.display();
+  delay(1000);
+}
 
-//   buttonPressed =false;
-//   Serial.println("跳出迴圈、pump中止");
-
-
-// }
+  buttonPressed =false;
+  Serial.println("跳出迴圈、pump中止");
 
 
-//     //回到上一頁
-//     else if(digitalRead(ENTER_BUTTON)==0 && chooseMode==true && digitalRead(LED)==false){
-//       Serial.println("重新回到選擇十進位頁面");
-//       count_3 = 0;
-//       count_2 = 0;
-//       count = 0 ;
-//       nextValue = 1;
-//       previousValue = 4;
-//       finalTimeValue = 0;
-//       digitalWrite(LED,HIGH);
-//       ten_digits_set = false;
-//       timeCheckMode = false;
-//       chooseMode = false;
-//       Serial.print("timeCheckMode:");
-//       Serial.println(digitalRead(timeCheckMode));
+}
 
-//        display.clearDisplay();
-//        display.setFont(&FreeSansBold9pt7b);
-//        display.drawRect(0,20,128,23,WHITE);
-//        displaySetting(count,previousValue,nextValue);
 
-//       count = 0;
+    //回到上一頁
+    else if(digitalRead(ENTER_BUTTON)==0 && chooseMode==true && digitalRead(LED)==false){
+      Serial.println("重新回到選擇十進位頁面");
+      count_3 = 0;
+      count_2 = 0;
+      count = 0 ;
+      nextValue = 1;
+      previousValue = 4;
+      finalTimeValue = 0;
+      digitalWrite(LED,HIGH);
+      ten_digits_set = false;
+      timeCheckMode = false;
+      chooseMode = false;
+      Serial.print("timeCheckMode:");
+      Serial.println(digitalRead(timeCheckMode));
+
+       display.clearDisplay();
+       display.setFont(&FreeSansBold9pt7b);
+       display.drawRect(0,20,128,23,WHITE);
+       displaySetting(count,previousValue,nextValue);
+
+      count = 0;
       
-//     }
+    }
 
 
-//     delay(100);
-// }
+    delay(100);
+}
 
 };
