@@ -41,15 +41,16 @@ bool optionFunc = true;
 bool optionFunc2 = true;
 const int NUM_ITEMS = 5; // number of items in the list and also the number of screenshots and screenshots with QR codes (other screens)
 const int MAX_ITEM_LENGTH = 20; // maximum characters for the item name
-const int NUM_OPTIONS = 3;
-const int MAX_OPTION_LENGTH = 10;
+const int NUM_OPTIONS = 4;
+const int MAX_OPTION_LENGTH = 20;
 
 bool timeSetting = false;
 
 char menu_options [NUM_OPTIONS][MAX_OPTION_LENGTH] = {
-  {"DAILY SET"},
-  {"RESET"},
-  {"cancel"}
+  {"Setted"},
+  {"Daily set"},
+  {"Reset"},
+  {"Cancel"}
 };
 
 char menu_items [NUM_ITEMS] [MAX_ITEM_LENGTH] = {
@@ -64,12 +65,12 @@ char menu_items [NUM_ITEMS] [MAX_ITEM_LENGTH] = {
 
 void optionSetting(byte count_v, byte previousValue_v, byte nextValue_v){
       // display.drawBitmap(1,1,bitmap_icons[previousValue_v],16,16,1);
-      display.setCursor(20,14); 
+      display.setCursor(5,15); 
       display.print(menu_options[previousValue_v]);
-      display.setCursor(20,36);     
+      display.setCursor(5,37);     
       display.print(menu_options[count_v]);
       // display.drawBitmap(1,24,bitmap_icons[count],16,16,1);
-      display.setCursor(20,58);             
+      display.setCursor(5,57);             
       display.print(menu_options[nextValue_v]);
       // display.drawBitmap(1,46,bitmap_icons[nextValue_v],16,16,1);
       display.display();
@@ -273,27 +274,22 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       last_button_time = currentMillis;
       count = (count + 1) % arraySize; // increase count value each time button is pressed
       display.clearDisplay();
-       display.setTextColor(WHITE);     
-        // display.drawRect(0,5,128,23,WHITE);
-        display.setCursor(5,15); 
-        display.println(menu_options[0]);
-        display.setCursor(5,37);     
-        display.println(menu_options[1]);
-        display.setCursor(5,57);             
-        display.println(menu_options[2]);
-        display.display();
+      display.setTextColor(WHITE);     
       Serial.print("count:");
       Serial.println(count);
       if(count==0){
-         display.drawRect(0,0,128,23,WHITE);
+        optionSetting(1,0,2);
       }
       else if (count==1){
-         display.drawRect(0,20,128,23,WHITE);
+        optionSetting(2,1,3);
       }
       else if (count==2){
-        display.drawRect(0,40,128,23,WHITE);
+        optionSetting(3,2,0);
       }
-    
+      else if (count==3){
+        optionSetting(0,3,1);
+      }
+      display.drawRect(0,20,128,23,WHITE);
       display.display();
       
       
@@ -301,14 +297,17 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
     if(digitalRead(ENTER_BUTTON)==LOW){
      switch(count){
       case 0:
+      //daily set
       Serial.println(count);
       break;
 
       case 1:
+      //reset
       Serial.println(count);
       break;
 
       case 2:
+      //cancel
       Serial.println(count);
       display.clearDisplay();
       timeSetting = false;
@@ -319,6 +318,11 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       digitalWrite(LED,HIGH);
       display.drawRect(0,20,128,23,WHITE);
       displaySetting(count,previousValue,nextValue);
+      break;
+
+      case 3:
+      //setted
+      Serial.println(count);
       break;
      }
      display.display();
