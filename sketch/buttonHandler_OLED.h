@@ -45,6 +45,7 @@ const int NUM_OPTIONS = 4;
 const int MAX_OPTION_LENGTH = 20;
 
 bool timeSetting = false;
+bool yesNo;
 
 char menu_options [NUM_OPTIONS][MAX_OPTION_LENGTH] = {
   {"Setted"},
@@ -63,6 +64,21 @@ char menu_items [NUM_ITEMS] [MAX_ITEM_LENGTH] = {
 
 
 
+void yesNoFunc(bool yesNo_value){
+  if(yesNo_value==true && digitalRead(BUTTON)==LOW){
+    display.drawRect(0,40,40,23,WHITE);
+    yesNo_value = !yesNo_value;
+
+  }
+  else if(yesNo_value==false && digitalRead(BUTTON)==LOW){
+    display.drawRect(0,100,40,23,WHITE);
+    yesNo_value = !yesNo_value;
+  }
+
+
+}
+
+
 void optionSetting(byte count_v, byte previousValue_v, byte nextValue_v){
       // display.drawBitmap(1,1,bitmap_icons[previousValue_v],16,16,1);
       display.setCursor(5,15); 
@@ -78,7 +94,6 @@ void optionSetting(byte count_v, byte previousValue_v, byte nextValue_v){
 
 
 void chooseModeSetting(int drawRectValue ,byte finalTimeValue_v){
-  
       display.setTextSize(0);
       display.setFont(&FreeSansBold9pt7b);
       display.clearDisplay();
@@ -240,12 +255,7 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
        
         display.setTextColor(WHITE);     
         display.drawRect(0,20,128,23,WHITE);
-        display.setCursor(5,15); 
-        display.println(menu_options[0]);
-        display.setCursor(5,37);     
-        display.println(menu_options[1]);
-        display.setCursor(5,57);             
-        display.println(menu_options[2]);
+        optionSetting(0,3,1);
         display.display();
         
         break;
@@ -278,16 +288,16 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       Serial.print("count:");
       Serial.println(count);
       if(count==0){
-        optionSetting(1,0,2);
+        optionSetting(0,3,1);
       }
       else if (count==1){
-        optionSetting(2,1,3);
+        optionSetting(1,0,2);
       }
       else if (count==2){
-        optionSetting(3,2,0);
+        optionSetting(2,1,3);
       }
       else if (count==3){
-        optionSetting(0,3,1);
+        optionSetting(3,2,0);
       }
       display.drawRect(0,20,128,23,WHITE);
       display.display();
@@ -298,17 +308,36 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
      switch(count){
       case 0:
       //daily set
-      Serial.println(count);
+      Serial.println(menu_options[count]);
+      
       break;
 
       case 1:
-      //reset
-      Serial.println(count);
+      Serial.println(menu_options[count]);
+
+
       break;
 
       case 2:
-      //cancel
-      Serial.println(count);
+      Serial.println(menu_options[count]);
+      buttonReady = false;
+      digitalWrite(LED,HIGH);
+      Serial.println(buttonReady);
+      display.clearDisplay();
+      display.setCursor(1,12); 
+      display.print("Initialize all ti-ming data?");
+      display.drawRect(0,40,40,23,WHITE);
+      display.setCursor(1,57);
+      display.print("Yes");
+      display.setCursor(70,57);
+      display.print("No");
+      display.display();
+      yesNo = true;
+      yesNoFunc(yesNo);
+      break;
+
+      case 3:
+      Serial.println(menu_options[count]);
       display.clearDisplay();
       timeSetting = false;
       count = 4 ;
@@ -318,11 +347,7 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       digitalWrite(LED,HIGH);
       display.drawRect(0,20,128,23,WHITE);
       displaySetting(count,previousValue,nextValue);
-      break;
 
-      case 3:
-      //setted
-      Serial.println(count);
       break;
      }
      display.display();
