@@ -3,8 +3,10 @@
 #include <Adafruit_SSD1306.h>
 #include <SPI.h>
 #include <Wire.h>
+#include <RTClib.h>
 #include <Fonts/FreeSans9pt7b.h>
 #include <Fonts/FreeSansBold9pt7b.h>
+#include<Fonts/FreeSansBold12pt7b.h>
 #include<Fonts/FreeSansBoldOblique24pt7b.h>
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
@@ -48,8 +50,6 @@ const unsigned char* bitmap_icons[5] = {
   epd_bitmap_icon_wifi,
   epd_bitmap_icon_routine
 };
-
-
 
 
 // 'scrollbar', 3x63px
@@ -199,4 +199,14 @@ const unsigned char* epd_bitmap_60X60[4] = {
   epd_bitmap_icon_cloud2,
   epd_bitmap_icon_rain,
   epd_bitmap_icon_sun
+};
+
+
+void setRTCManually(){
+  display.clearDisplay();
+  display.setTextSize(0);
+  display.setFont(&FreeSansBold12pt7b);
+  display.setCursor(1,40);
+  display.print("2023-01-01");
+  display.display();
 };
