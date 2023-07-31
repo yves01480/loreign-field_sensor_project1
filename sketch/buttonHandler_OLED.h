@@ -43,7 +43,7 @@ const int NUM_ITEMS = 5; // number of items in the list and also the number of s
 const int MAX_ITEM_LENGTH = 20; // maximum characters for the item name
 const int NUM_OPTIONS = 4;
 const int MAX_OPTION_LENGTH = 20;
-
+bool yesNoChoose = true;
 bool timeSetting = false;
 bool yesNo;
 
@@ -288,15 +288,20 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       Serial.print("count:");
       Serial.println(count);
       if(count==0){
+        //setted
         optionSetting(0,3,1);
       }
       else if (count==1){
+        //daily set
         optionSetting(1,0,2);
       }
       else if (count==2){
+        //reset
+        
         optionSetting(2,1,3);
       }
       else if (count==3){
+        //cancel
         optionSetting(3,2,0);
       }
       display.drawRect(0,20,128,23,WHITE);
@@ -319,21 +324,20 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       break;
 
       case 2:
-      Serial.println(menu_options[count]);
+      yesNo = true;
       buttonReady = false;
+      Serial.println(menu_options[count]);
       digitalWrite(LED,HIGH);
       Serial.println(buttonReady);
       display.clearDisplay();
       display.setCursor(1,12); 
       display.print("Initialize all ti-ming data?");
-      display.drawRect(0,40,40,23,WHITE);
+      // display.drawRect(0,40,40,23,WHITE);
       display.setCursor(1,57);
       display.print("Yes");
       display.setCursor(70,57);
       display.print("No");
       display.display();
-      yesNo = true;
-      yesNoFunc(yesNo);
       break;
 
       case 3:
@@ -347,7 +351,8 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       digitalWrite(LED,HIGH);
       display.drawRect(0,20,128,23,WHITE);
       displaySetting(count,previousValue,nextValue);
-
+      Serial.print("yesNo:");
+      Serial.println(yesNo);
       break;
      }
      display.display();
@@ -355,6 +360,51 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
     // timSetting
     delay(10);
   };
+
+  if(yesNo==true){
+    if (digitalRead(BUTTON)==LOW && yesNoChoose==true){
+    display.clearDisplay();
+    display.setCursor(1,12); 
+      display.print("Initialize all ti-ming data?");
+      // display.drawRect(0,40,40,23,WHITE);
+      display.setCursor(1,57);
+      display.print("Yes");
+      display.setCursor(70,57);
+      display.print("No");
+    Serial.println("yes!");
+    display.drawRect(0,40,40,23,WHITE);
+    yesNoChoose = false;
+    display.display();
+
+    }
+
+    else if (digitalRead(BUTTON)==LOW&& yesNoChoose==false){
+      display.clearDisplay();
+      display.setCursor(1,12); 
+      display.print("Initialize all ti-ming data?");
+      // display.drawRect(0,40,40,23,WHITE);
+      display.setCursor(1,57);
+      display.print("Yes");
+      display.setCursor(70,57);
+      display.print("No");
+      Serial.println("no");
+      display.drawRect(60,40,40,23,WHITE);
+      yesNoChoose = true;
+      display.display();
+    }
+    delay(50);
+
+    if (digitalRead(ENTER_BUTTON)==LOW && yesNoChoose ==false){
+      Serial.println("You push the yes button.");
+    }
+
+    else if (digitalRead(ENTER_BUTTON)==LOW && yesNoChoose ==true){
+      Serial.println("You push the no button.");
+    }
+
+
+
+  }
 
 
   if(timeCheckMode==true){
