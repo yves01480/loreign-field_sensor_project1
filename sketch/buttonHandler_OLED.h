@@ -1,5 +1,8 @@
 #include "myDHT22.h"
 #include "mySSD1306.h"
+// #include "myClock.h"
+// #include "timeSetting.h"
+// #include "basicSetting.h"
 
 const byte BUTTON=33; // our button pin
 const byte ENTER_BUTTON = 25;
@@ -12,11 +15,15 @@ unsigned long finalTimeValue;
 unsigned long buttonPressStartTime = 0;
 const long interval = 3000;
 bool ledReady = false; // flag for when button is let go
+int twoDigits[] ={0,1};
 int digits[] = {0,1,2,3,4,5,6,7,8,9};
 int ten_digits[] = {0,1,2,3,4,5,6,7,8,9};
+int x_rect[] = {27,40,61,74,95,110};
 int count = 0;
 int count_2 = -1;
 int count_3 = -1;
+int count_time_adjust;
+int count_time_radix = 0;
 int countDownTime = 0;
 int previousValue = 0;
 int nextValue = 0;
@@ -33,21 +40,98 @@ bool ten_digits_set;
 bool waterPumpMode;
 bool digits_confirm;
 bool buttonPressed = false;
+bool buttonReady;
+bool optionFunc = true;
+bool optionFunc2 = true;
 const int NUM_ITEMS = 5; // number of items in the list and also the number of screenshots and screenshots with QR codes (other screens)
 const int MAX_ITEM_LENGTH = 20; // maximum characters for the item name
+const int NUM_OPTIONS = 4;
+const int MAX_OPTION_LENGTH = 20;
+bool yesNoChoose = true;
+bool timeSetting = false;
+bool yesNo = false;
+bool setted;
+bool confirmYesNo = false;
+bool adjustTime;
+bool adjustTimeOption;
+bool initializeOption = true;
+
+char menu_options [NUM_OPTIONS][MAX_OPTION_LENGTH] = {
+  {"Setted"},
+  {"Daily set"},
+  {"Reset"},
+  {"Cancel"}
+};
 
 char menu_items [NUM_ITEMS] [MAX_ITEM_LENGTH] = {
-  {"Time setting"},
+  {"Countdown"},
   {"Soil data"},
   {"Temp."},
   {"Wifi"},
-  {"Daily setting"}
+  {"Time setting"}
 };
 
 
 
-void choosrModeSetting(int drawRectValue ,byte finalTimeValue_v){
-  
+void yesNoFunc(bool yesNo_value){
+  if(yesNo_value==true && digitalRead(BUTTON)==LOW){
+    display.drawRect(0,40,40,23,WHITE);
+    yesNo_value = !yesNo_value;
+
+  }
+  else if(yesNo_value==false && digitalRead(BUTTON)==LOW){
+    display.drawRect(0,100,40,23,WHITE);
+    yesNo_value = !yesNo_value;
+  }
+
+
+}
+/*
+void timeAdjust(){
+        int digitSize = sizeof(digits)/sizeof(digits[0]);
+        count_time_adjust = (count_time_adjust+ 1) % digitSize;
+        display.clearDisplay();
+        display.setTextSize(0);
+        display.setFont(&FreeSansBold12pt7b);
+        display.setCursor(1,40);
+        display.print("20");
+        display.print(digits[count_time_adjust]);
+        display.print("0-01-01");
+        display.setCursor(1,40);
+        display.drawRect(27,20,15,23,WHITE);
+        display.display();
+
+}
+*/
+
+// int updateCountTimeRadix(int x_rect_value[], int &count_time_radix) {
+//     int digitSize = sizeof(x_rect_value) / sizeof(x_rect_value[0]);
+//     count_time_radix = (count_time_radix + 1) % digitSize;
+//     Serial.println(count_time_radix);
+
+//     display.clearDisplay();
+//     display.setCursor(1, 40);
+//     display.drawRect(x_rect_value[count_time_radix], 20, 15, 23, WHITE);
+//     display.display();
+
+//     return count_time_radix;
+// }
+
+void optionSetting(byte count_v, byte previousValue_v, byte nextValue_v){
+      // display.drawBitmap(1,1,bitmap_icons[previousValue_v],16,16,1);
+      display.setCursor(5,15); 
+      display.print(menu_options[previousValue_v]);
+      display.setCursor(5,37);     
+      display.print(menu_options[count_v]);
+      // display.drawBitmap(1,24,bitmap_icons[count],16,16,1);
+      display.setCursor(5,57);             
+      display.print(menu_options[nextValue_v]);
+      // display.drawBitmap(1,46,bitmap_icons[nextValue_v],16,16,1);
+      display.display();
+}
+
+
+void chooseModeSetting(int drawRectValue ,byte finalTimeValue_v){
       display.setTextSize(0);
       display.setFont(&FreeSansBold9pt7b);
       display.clearDisplay();
@@ -76,14 +160,26 @@ void displaySetting(byte count_v,byte previousValue_v,byte nextValue_v){
 };
 
 
+byte timeAdjustment(int value[], int size) {
+    int digitSize = size;
+    count_time_adjust = (count_time_adjust + 1) % digitSize; 
+    return count_time_adjust;
+    delay(10);
+}
+
+
 void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
 
   // bool buttonReady = buttonCheck(BUTTON);
-  if (digitalRead(BUTTON)==0 && timeCheckMode != true) {
-    
+  if (digitalRead(BUTTON)==0 && timeCheckMode != true && buttonReady !=true ) {
+    Serial.println("what");
+    Serial.print("timeSetting:");
+    Serial.println(timeSetting);
+    Serial.print("buttonReady:");
+    Serial.println(buttonReady);
     display.clearDisplay();
-    Serial.print("timeCheckMode:");
-    Serial.println(timeCheckMode);
+    // Serial.print("timeCheckMode:");
+    // Serial.println(timeCheckMode);
     digitalWrite(LED, HIGH);
     int arraySize = sizeof(menu_items)/sizeof(menu_items[0]);
     display.setFont(&FreeSansBold9pt7b);
@@ -99,14 +195,14 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       if (count == 0){
         previousValue = arraySize-1;
         displaySetting(count,previousValue,nextValue);
+        
       }
 
       else if (count == 4){
       nextValue = 0;
       displaySetting(count,previousValue,nextValue);
       }
-      
- 
+    
       else{
       displaySetting(count,previousValue,nextValue);   
     }
@@ -116,20 +212,23 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
 
     }
 
-
-  if ((unsigned long)(currentMillis - last_button_time) >= 10000 && waterPumpMode != true) {
-    display.clearDisplay();
-    display.display();
-    // ledReady = false;
-    digitalWrite(LED, LOW);
-    count = 0;
-    count_2 = 0;
-    count_3 = 0;
-    timeCheckMode = false;
+  //REBOOT
+  // if ((unsigned long)(currentMillis - last_button_time) >= 10000 && waterPumpMode != true) {
+  //   display.clearDisplay();
+  //   display.display();
+  //   // ledReady = false;
+  //   digitalWrite(LED, LOW);
+  //   count = 0;
+  //   count_2 = 0;
+  //   count_3 = 0;
+  //   timeCheckMode = false;
+  //   timeSetting=false;
     
-    }
+  //   }
 
-  if(digitalRead(LED) ==HIGH && digitalRead(ENTER_BUTTON)==0 &&  timeCheckMode != true){
+
+
+  if(digitalRead(LED) ==HIGH && digitalRead(ENTER_BUTTON)==0 &&  timeCheckMode != true && timeSetting != true){
     
     last_button_time = currentMillis;
     float temp_data = dht22_temp();
@@ -158,14 +257,14 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       display.print("mins ");
       display.display();
         break;
+
       case 1:
         // Soil data 的程式碼
-
         Serial.println(menu_items[count]);
 
         break;
+
       case 2:
-        
         display.setFont(&FreeSans9pt7b);
         display.setTextSize(0); 
         display.clearDisplay();
@@ -190,6 +289,22 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
 
         Serial.println(menu_items[count]);
         break;
+
+      case 4:
+        //Time Setting
+        Serial.print("This is: ");
+        Serial.println(menu_items[count]);
+        timeSetting = true;
+        digitalWrite(LED,LOW);
+        display.clearDisplay();
+        // buttonPressStartTime = millis();
+       
+        display.setTextColor(WHITE);     
+        display.drawRect(0,20,128,23,WHITE);
+        optionSetting(0,3,1);
+        display.display();
+        
+        break;
       
 
       default:
@@ -199,7 +314,296 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
     }
   }
 
+
+  if(timeSetting==true){
+    buttonReady=true;
+    int arraySize = sizeof(menu_options)/sizeof(menu_options[0]);
+   
+    
+    display.setFont(&FreeSansBold9pt7b);
+  
+    // optionSetting(count,previousValue,nextValue);
+    if(digitalRead(BUTTON)==LOW && buttonReady==true && digitalRead(LED)==LOW){
+      
+    
+      // check if the button has been pressed
+      last_button_time = currentMillis;
+      count = (count + 1) % arraySize; // increase count value each time button is pressed
+      display.clearDisplay();
+      display.setTextColor(WHITE);     
+      Serial.print("count:");
+      Serial.println(count);
+      if(count==0){
+        //setted
+        optionSetting(0,3,1);
+
+      }
+      else if (count==1){
+        //daily set
+        optionSetting(1,0,2);
+      }
+      else if (count==2){
+        //reset
+        
+        optionSetting(2,1,3);
+      }
+      else if (count==3){
+        //cancel
+        optionSetting(3,2,0);
+      }
+      display.drawRect(0,20,128,23,WHITE);
+      display.display();
+      
+      
+  };  
+    if(digitalRead(ENTER_BUTTON)==LOW && digitalRead(LED)==LOW){
+     
+      //Serial.println(menu_options[count]);
+     switch(count){
+      case 0:
+      //setted
+      Serial.println(menu_options[count]);
+      setted = true;
+      
+      break;
+
+      case 1:
+      Serial.println(menu_options[count]);
+
+
+      break;
+
+      case 2:
+      yesNo=true;
+      //confirmYesNo = false;
+      // Serial.println(menu_options[count]);
+      digitalWrite(LED,HIGH);
+      // Serial.println(buttonReady);
+      display.clearDisplay();
+      display.setCursor(1,12); 
+      display.print("Initialize all ti-ming data?");
+      // display.drawRect(0,40,40,23,WHITE);
+      display.setCursor(1,57);
+      display.print("Yes");
+      display.setCursor(70,57);
+      display.print("No");
+      display.display();
+      break;
+
+      case 3:
+      Serial.println(menu_options[count]);
+      display.clearDisplay();
+      timeSetting = false;
+      count = 4 ;
+      previousValue = 3;
+      nextValue = 0;
+      buttonReady = false;
+      //digitalWrite(LED,HIGH);
+      display.drawRect(0,20,128,23,WHITE);
+      displaySetting(count,previousValue,nextValue);
+      Serial.print("yesNo:");
+      Serial.println(yesNo);
+      break;
+     }
+     display.display();
+    }
+    // timSetting
+    delay(10);
+  };
+
+  if(setted==true){
+
+  }
+
+  if(yesNo==true){
+    if (digitalRead(BUTTON)==LOW && yesNoChoose==true && initializeOption ==true){
+    display.clearDisplay();
+    display.setCursor(1,12); 
+      display.print("Initialize all ti-ming data?");
+      // display.drawRect(0,40,40,23,WHITE);
+      display.setCursor(1,57);
+      display.print("Yes");
+      display.setCursor(70,57);
+      display.print("No");
+    display.drawRect(0,40,40,23,WHITE);
+    yesNoChoose = false;
+   
+    display.display();
+
+    }
+
+    else if (digitalRead(BUTTON)==LOW && yesNoChoose==false && initializeOption ==true){
+      display.clearDisplay();
+      display.setCursor(1,12); 
+      display.print("Initialize all ti-ming data?");
+      // display.drawRect(0,40,40,23,WHITE);
+      display.setCursor(1,57);
+      display.print("Yes");
+      display.setCursor(70,57);
+      display.print("No");
+      Serial.println("no");
+      display.drawRect(60,40,40,23,WHITE);
+      yesNoChoose = true;
+      
+      display.display();
+    }
+    delay(50);
+
+    if (digitalRead(ENTER_BUTTON)==LOW && yesNoChoose ==false && initializeOption ==true){
+      Serial.println("You push the yes button.");
+      yesNo = false;
+      adjustTime = true;
+      adjustTimeOption = true;
+      //digitalWrite(LED,HIGH);
+      //confirmYesNo = true;
+      display.clearDisplay();
+      display.setTextSize(0);
+      display.setFont(&FreeSansBold12pt7b);
+      display.setCursor(1,40);
+      display.print("2000-01-01");
+
+      display.setCursor(1,40);
+      display.drawRect(27,20,15,23,WHITE);
+      display.display();
+    }
+
+
+    else if (digitalRead(ENTER_BUTTON)==LOW && yesNoChoose ==true && initializeOption ==true){
+      Serial.println("You push the no button.");
+      display.clearDisplay();
+      //confirmYesNo = false;
+      /*
+      count = 4 ;
+      previousValue = 3;
+      nextValue = 0;
+      */
+      digitalWrite(LED,LOW);
+      
+      optionSetting(2,1,3);
+      display.drawRect(0,20,128,23,WHITE);
+      // displaySetting(count,previousValue,nextValue);
+      
+      Serial.print("yesNo:");
+      Serial.println(yesNo);
+      
+      timeSetting = true;
+      adjustTime=false;
+      adjustTimeOption = false;
+      yesNo = false;
+      display.display();
+    }
+
+  }
+
+  if (adjustTime==true){
+    initializeOption = false;
+    display.clearDisplay();        
+    display.setTextSize(0);
+    display.setFont(&FreeSansBold12pt7b);
+    
+    // display.print("20");
+    
+
+
+
+    
+    if (digitalRead(ENTER_BUTTON)==LOW && digitalRead(LED)==HIGH && adjustTimeOption ==true){
+      // int newCountTimeRadix = updateCountTimeRadix(x_rect, count_time_radix);
+      
+      display.clearDisplay();
+      int digitSize = sizeof(x_rect) / sizeof(x_rect[0]);
+      count_time_radix = (count_time_radix + 1) % digitSize;
+      Serial.println(count_time_radix);
+      // display.print(x_rect[count_time_radix]);
+      display.setCursor(1,40);
+      display.drawRect(x_rect[count_time_radix],20,15,23,WHITE);
+      display.setCursor(1,40);
+      display.display();
+
+      // Serial.println(newCountTimeRadix);
+      // switch(count_time_radix){
+      // case 0:
+      // Serial.print("case 0:");
+      // Serial.println("here");
+
+      // break;
+      // case 1:
+      // break;
+      // case 2:
+      // break;
+      // case 3:
+      // break;
+      // case 4:
+      // break;
+      // case 5:
+      // break;
+
+      // default:
+      // Serial.print("default:")
+      // Serial.println("here");
+      // break;
+
+      // }
+      display.display();
+
+    }
+    
+    if (digitalRead(BUTTON) == LOW && digitalRead(LED) == HIGH && adjustTimeOption == true) {
+
+    //年分
+    byte yearAdjustmentValue = timeAdjustment(ten_digits, sizeof(ten_digits) / sizeof(ten_digits[0]));  
+    //十位數的月份
+    byte valueOfAdjustment = timeAdjustment(twoDigits, sizeof(twoDigits) / sizeof(twoDigits[0]));
+    Serial.print("valueOfAdjustment:");
+    Serial.println(valueOfAdjustment);
+    display.clearDisplay();
+
+/*
+       switch(count_time_radix){
+        case 0:
+        //年份
+        Serial.print("count_time_radix:");
+        Serial.println(count_time_radix);
+        break;
+
+        case 1:
+        Serial.print("count_time_radix:");
+        Serial.println(count_time_radix);
+        break;
+
+        case 2:
+        Serial.print("count_time_radix:");
+        Serial.println(count_time_radix);
+        break;
+
+        case 3:
+        Serial.print("count_time_radix:");
+        Serial.println(count_time_radix);
+        break;
+
+        case 4:
+        Serial.print("count_time_radix:");
+        Serial.println(count_time_radix);
+        break;
+
+        case 5:
+        Serial.print("count_time_radix:");
+        Serial.println(count_time_radix);
+         break;
+
+       }
+       */
+    }
+    // int valueOfAdjustment = timeAdjustment();
+    
+
+
+
+  }
+
+
   if(timeCheckMode==true){
+
     previousMillis = millis();
     display.setFont(&FreeSansBoldOblique24pt7b);
     display.setTextSize(1); 
@@ -274,7 +678,7 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
        int ten_digits_value = ten_digits[confirmCount]*10;
       finalTimeValue = ten_digits_value+digits[confirmDigit];
        Serial.println("confirm 個位數數據");
-       choosrModeSetting(20,finalTimeValue);
+       chooseModeSetting(20,finalTimeValue);
        Serial.println(finalTimeValue);
        ten_digits_confirm = false;
        digits_confirm = false;
@@ -290,7 +694,7 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       confirmDigit = count_2;
       int ten_digits_value = ten_digits[confirmCount]*10;
       finalTimeValue = ten_digits_value+digits[confirmDigit];
-      choosrModeSetting(20,finalTimeValue);
+      chooseModeSetting(20,finalTimeValue);
       Serial.println(finalTimeValue);
       ten_digits_confirm = false;
       digits_confirm = false;
@@ -302,7 +706,7 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       digits_confirm = false;
       ten_digits_confirm = false;
       chooseMode =true;
-      choosrModeSetting(40,finalTimeValue);
+      chooseModeSetting(40,finalTimeValue);
       Serial.print("chooseMode:");
       Serial.println(chooseMode);
 
@@ -315,7 +719,7 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       digits_confirm = false;
       ten_digits_confirm = false;
       chooseMode = false;
-      choosrModeSetting(20,finalTimeValue);
+      chooseModeSetting(20,finalTimeValue);
       Serial.print("chooseMode:");
       Serial.println(chooseMode);
 
@@ -448,7 +852,7 @@ for (unsigned long elapsedTime = 0; elapsedTime <= finalTimeValue_mins; elapsedT
       count_2 = 0;
       count = 0 ;
       nextValue = 1;
-      previousValue = 3;
+      previousValue = 4;
       finalTimeValue = 0;
       digitalWrite(LED,HIGH);
       ten_digits_set = false;
