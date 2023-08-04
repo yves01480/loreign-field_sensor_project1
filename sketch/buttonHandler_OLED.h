@@ -30,6 +30,15 @@ int nextValue = 0;
 int selected_menu = 0;
 int confirmCount;
 int confirmDigit;
+int setYear1;
+int setYear2;
+int setDate1;
+int setDate2 = 1;
+int setDate3;
+int setDate4=1;
+int confirmReset;
+bool returnState;
+bool confirmResetOption;
 bool digits_choose_zero;
 bool preventStupidMode;
 bool chooseMode;
@@ -54,6 +63,7 @@ bool setted;
 bool confirmYesNo = false;
 bool adjustTime;
 bool adjustTimeOption;
+bool adjustTiming;
 bool initializeOption = true;
 
 char menu_options [NUM_OPTIONS][MAX_OPTION_LENGTH] = {
@@ -158,15 +168,6 @@ void displaySetting(byte count_v,byte previousValue_v,byte nextValue_v){
       display.drawBitmap(1,46,bitmap_icons[nextValue_v],16,16,1);
       display.display();
 };
-
-
-byte timeAdjustment(int value[], int size) {
-    int digitSize = size;
-    count_time_adjust = (count_time_adjust + 1) % digitSize; 
-    return count_time_adjust;
-    delay(10);
-}
-
 
 void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
 
@@ -462,8 +463,8 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       display.setCursor(1,40);
       display.print("2000-01-01");
 
-      display.setCursor(1,40);
-      display.drawRect(27,20,15,23,WHITE);
+      // display.setCursor(1,40);
+      // display.drawRect(27,20,15,23,WHITE);
       display.display();
     }
 
@@ -507,93 +508,323 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
 
 
     
-    if (digitalRead(ENTER_BUTTON)==LOW && digitalRead(LED)==HIGH && adjustTimeOption ==true){
+    if (digitalRead(ENTER_BUTTON)==LOW && digitalRead(LED)==HIGH && adjustTimeOption ==true && returnState == true){
       // int newCountTimeRadix = updateCountTimeRadix(x_rect, count_time_radix);
+
       
       display.clearDisplay();
+
       int digitSize = sizeof(x_rect) / sizeof(x_rect[0]);
       count_time_radix = (count_time_radix + 1) % digitSize;
       Serial.println(count_time_radix);
       // display.print(x_rect[count_time_radix]);
+   
+      // display.drawRect(x_rect[count_time_radix],20,15,23,WHITE);
       display.setCursor(1,40);
-      display.drawRect(x_rect[count_time_radix],20,15,23,WHITE);
-      display.setCursor(1,40);
+      display.print("20");
       display.display();
 
       // Serial.println(newCountTimeRadix);
-      // switch(count_time_radix){
-      // case 0:
-      // Serial.print("case 0:");
-      // Serial.println("here");
+      switch(count_time_radix){
+      case 0:
+      Serial.print("count_time_radix:");
+      Serial.println(count_time_radix);
+      display.print(setYear1);
+      display.print(setYear2);
+      display.print("-");
+      display.print(setDate1);
+      display.print(setDate2);
+      display.print("-");
+      display.print(setDate3);
+      display.print(setDate4);
+      display.setFont(&FreeSansBold9pt7b);
+      display.setCursor(1,60);
+      display.print("YES?");
+      display.setCursor(70,60);
+      display.print("NO");
+      adjustTimeOption = false;
+      confirmReset = true;
 
-      // break;
-      // case 1:
-      // break;
-      // case 2:
-      // break;
-      // case 3:
-      // break;
-      // case 4:
-      // break;
-      // case 5:
-      // break;
 
-      // default:
-      // Serial.print("default:")
-      // Serial.println("here");
-      // break;
+      break;
+      case 1:
+      display.drawRect(x_rect[count_time_radix],20,15,23,WHITE);
+      Serial.print("setYear1:");
+        Serial.println(setYear1);
+        display.print(setYear1);
+        display.print("0-01-01");
 
-      // }
+      break;
+      case 2:
+       display.drawRect(x_rect[count_time_radix],20,15,23,WHITE);
+        display.print(setYear1);
+        display.print(setYear2);
+        display.print("-01-01");
+
+
+      break;
+      case 3:
+      display.drawRect(x_rect[count_time_radix],20,15,23,WHITE);
+      display.print(setYear1);
+      display.print(setYear2);
+        // display.drawRect(0,20,15,23,WHITE);
+      display.print("-");
+      display.print(setDate1);
+      display.print("1-01");
+
+      break;
+      case 4:
+      display.drawRect(x_rect[count_time_radix],20,15,23,WHITE);
+      display.print(setYear1);
+      display.print(setYear2);
+      display.print("-");
+      display.print(setDate1);
+      display.print(setDate2);
+      display.print("-01");
+
+
+      break;
+      case 5:
+      display.drawRect(x_rect[count_time_radix],20,15,23,WHITE);
+        display.print(setYear1);
+        display.print(setYear2);
+        display.print("-");
+        display.print(setDate1);
+        display.print(setDate2);
+        display.print("-");
+        display.print(setDate3);
+        display.print("1");
+
+      break;
+
+
+
+           Serial.println(count_time_radix);
+
+
+      }
       display.display();
 
     }
+
+    if(digitalRead(BUTTON)==LOW && digitalRead(LED)==HIGH && adjustTimeOption ==false && confirmReset==true &&  confirmResetOption==true){
+      display.clearDisplay();
+      display.setCursor(1,40);
+           display.print("20");
+        display.print(setYear1);
+        display.print(setYear2);
+        display.print("-");
+        display.print(setDate1);
+        display.print(setDate2);
+        display.print("-");
+        display.print(setDate3);
+        display.print(setDate4);
+        display.setFont(&FreeSansBold9pt7b);
+        display.setCursor(1,60);
+        display.print("YES?");
+        display.drawRect(0,41.8,50,23,WHITE);
+        display.setCursor(70,60);
+
+        display.print("NO");
+        display.display();
+        confirmResetOption = false;
+    }
+
+    else if (digitalRead(BUTTON)==LOW && digitalRead(LED)==HIGH && adjustTimeOption ==false && confirmReset==true &&  confirmResetOption==false){
+            display.clearDisplay();
+      display.setCursor(1,40);
+           display.print("20");
+        display.print(setYear1);
+        display.print(setYear2);
+        display.print("-");
+        display.print(setDate1);
+        display.print(setDate2);
+        display.print("-");
+        display.print(setDate3);
+        display.print(setDate4);
+        display.setFont(&FreeSansBold9pt7b);
+        display.setCursor(1,60);
+        display.print("YES?");
+        
+        display.setCursor(70,60);
+        display.drawRect(69,41.8,32,23,WHITE);
+        display.print("NO");
+        display.display();
+        confirmResetOption = true;
+    }
+
+    if(digitalRead(ENTER_BUTTON)==LOW && confirmResetOption ==false && adjustTimeOption == false){
+      Serial.println("Yes!");
+      adjustTiming = true;
+    }
+
+    else if (digitalRead(ENTER_BUTTON)==LOW && confirmResetOption==true && adjustTimeOption == false){
+      Serial.println("No");
+    setYear1 = 0;
+    setYear2 = 0;
+    setDate1 = 0;
+    setDate2 = 1;
+    setDate3 = 0;
+    setDate4 = 1;
+    count_time_radix = 0;
+    display.setCursor(1,40);
+    display.print("20");
+     display.print(setYear1);
+        display.print(setYear2);
+        display.print("-");
+        display.print(setDate1);
+        display.print(setDate2);
+        display.print("-");
+        display.print(setDate3);
+        display.print(setDate4);
+        display.display();
+    adjustTimeOption = true;
+    confirmReset = false;
+    returnState = false;
+    }
     
     if (digitalRead(BUTTON) == LOW && digitalRead(LED) == HIGH && adjustTimeOption == true) {
+      display.clearDisplay();
+      returnState = true;
+      int tenDigitYearOption = sizeof(twoDigits) / sizeof(twoDigits[0]);
+      int digitYearOption = sizeof(digits) /sizeof(digits[0]);
+      display.setCursor(1,40);
+      display.print(20);
 
-    //年分
-    byte yearAdjustmentValue = timeAdjustment(ten_digits, sizeof(ten_digits) / sizeof(ten_digits[0]));  
-    //十位數的月份
-    byte valueOfAdjustment = timeAdjustment(twoDigits, sizeof(twoDigits) / sizeof(twoDigits[0]));
-    Serial.print("valueOfAdjustment:");
-    Serial.println(valueOfAdjustment);
-    display.clearDisplay();
 
-/*
        switch(count_time_radix){
         case 0:
-        //年份
-        Serial.print("count_time_radix:");
-        Serial.println(count_time_radix);
+        //十位數年份
+        setYear1 = (setYear1 + 1) % digitYearOption;
+        display.drawRect(x_rect[count_time_radix],20,15,23,WHITE);
+        display.print(setYear1);
+        display.print("0-01-01");
+
+
+
         break;
 
         case 1:
-        Serial.print("count_time_radix:");
-        Serial.println(count_time_radix);
+        //個位數年分
+        setYear2 = (setYear2 + 1) % digitYearOption;
+        display.drawRect(x_rect[count_time_radix],20,15,23,WHITE);
+        display.print(setYear1);
+        display.print(setYear2);
+        display.print("-01-01");
+        
+
+      
         break;
 
         case 2:
-        Serial.print("count_time_radix:");
-        Serial.println(count_time_radix);
+        //十位數月份
+        
+        setDate1 = (setDate1 + 1) % tenDigitYearOption; 
+        display.drawRect(x_rect[count_time_radix],20,15,23,WHITE);
+        display.print(setYear1);
+        display.print(setYear2);
+        // display.drawRect(0,20,15,23,WHITE);
+        display.print("-");
+        display.print(setDate1);
+        display.print("1-01");
+        Serial.print("setDate:");
+        Serial.println(setDate1);
+      
         break;
 
         case 3:
-        Serial.print("count_time_radix:");
-        Serial.println(count_time_radix);
+        //個位數月份
+        display.drawRect(x_rect[count_time_radix],20,15,23,WHITE);
+        setDate2  = (setDate2 % (digitYearOption-1))+1;
+
+        if (setDate1==1){
+          setDate2 = (setDate2+3) % 3;
+
+        }
+
+        else if(setDate2==0){
+          setDate2 = digitYearOption -1;
+        }
+
+        display.print(setYear1);
+        display.print(setYear2);
+        display.print("-");
+        display.print(setDate1);
+        display.print(setDate2);
+        display.print("-01");
+       
         break;
 
         case 4:
-        Serial.print("count_time_radix:");
-        Serial.println(count_time_radix);
+        //十位數日期
+        display.drawRect(x_rect[count_time_radix],20,15,23,WHITE);
+        setDate3  = (setDate3 % (digitYearOption-1))+1;
+        if (setDate1 == 0 && setDate2 !=2){
+          setDate3 = (setDate3 % 4);
+          // if(setDate3 ==0){
+          //   setDate3 = 3;
+          // }
+        }
+        display.print(setYear1);
+        display.print(setYear2);
+        display.print("-");
+        display.print(setDate1);
+        display.print(setDate2);
+        display.print("-");
+        display.print(setDate3);
+        display.print("1");
+       
         break;
 
         case 5:
-        Serial.print("count_time_radix:");
-        Serial.println(count_time_radix);
+        //個位數日期
+        display.drawRect(x_rect[count_time_radix],20,15,23,WHITE);
+        setDate4  = (setDate4 % (digitYearOption-1));
+        //如果日期是0開頭，那個位數只會出現1~9
+        if(setDate3==0){
+          setDate4  = (setDate4 % (digitYearOption-1))+1;
+          
+        }
+        //處理二月份的日期
+        else if(setDate2==2 && setDate3==2){
+            setDate4= (setDate4 + 1) % 9;
+        }
+
+        //如果日期是1,2開頭，個位數會出現0~9
+        else if (setDate3==1||setDate3==2){
+          setDate4  = (setDate4 % (digitYearOption-1));
+        }
+
+        //如果是大月，並且日期十位數為3時，個位數要出現0或1
+        else if(setDate3==3 && setDate1==0 && setDate2==1||setDate2==3||setDate2==5||setDate2==7||setDate2==8){
+          setDate4 = (setDate4 +1)%2;
+        }
+
+        else if (setDate3==3&&setDate1==1 &&setDate2==0||setDate2==2){
+          setDate4 = (setDate4 +1)%2;
+        }
+
+        //如果是小月，並且日期十位數為3，個位數為0
+        else if(setDate3==3 && setDate1==1 && setDate2==4||setDate2==6||setDate2==9||setDate2==11){
+          setDate4 = 0;
+        }
+
+        display.print(setYear1);
+        display.print(setYear2);
+        display.print("-");
+        display.print(setDate1);
+        display.print(setDate2);
+        display.print("-");
+        display.print(setDate3);
+        display.print(setDate4);
          break;
 
        }
-       */
+      
+      display.display();   
     }
+    delay(50);
+    
     // int valueOfAdjustment = timeAdjustment();
     
 
