@@ -15,10 +15,15 @@ unsigned long finalTimeValue;
 unsigned long buttonPressStartTime = 0;
 const long interval = 3000;
 bool ledReady = false; // flag for when button is let go
+int count12;
+int setDateArray[3];
+int setTimeArray[3];
 int twoDigits[] ={0,1};
 int digits[] = {0,1,2,3,4,5,6,7,8,9};
 int ten_digits[] = {0,1,2,3,4,5,6,7,8,9};
 int x_rect[] = {27,40,61,74,95,110};
+int timeArray[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59};
+const char* periods[] = {"am","pm"};
 int count = 0;
 int count_2 = -1;
 int count_3 = -1;
@@ -36,8 +41,14 @@ int setDate1;
 int setDate2 = 1;
 int setDate3;
 int setDate4=1;
-int confirmReset;
+int setAPM;
+int setHour1=0;
+int setHour2=0;
+int setMin1=0;
+int setMin2=0;
+bool setTiming;
 bool returnState;
+bool confirmReset;
 bool confirmResetOption;
 bool digits_choose_zero;
 bool preventStupidMode;
@@ -58,17 +69,17 @@ const int NUM_OPTIONS = 4;
 const int MAX_OPTION_LENGTH = 20;
 bool yesNoChoose = true;
 bool timeSetting = false;
-<<<<<<< HEAD
-bool yesNo;
-=======
 bool yesNo = false;
 bool setted;
 bool confirmYesNo = false;
-bool adjustTime;
+bool adjustTime; //調整日期
 bool adjustTimeOption;
-bool adjustTiming;
+bool adjustTiming; //調整時間
+bool adjustTimingOption;
 bool initializeOption = true;
->>>>>>> feature/feature-timeOption-6.0
+bool chooseTimeSetting;
+bool confirmAdjustTimingOption;
+
 
 char menu_options [NUM_OPTIONS][MAX_OPTION_LENGTH] = {
   {"Setted"},
@@ -87,6 +98,7 @@ char menu_items [NUM_ITEMS] [MAX_ITEM_LENGTH] = {
 
 
 
+
 void yesNoFunc(bool yesNo_value){
   if(yesNo_value==true && digitalRead(BUTTON)==LOW){
     display.drawRect(0,40,40,23,WHITE);
@@ -100,40 +112,8 @@ void yesNoFunc(bool yesNo_value){
 
 
 }
-<<<<<<< HEAD
 
-=======
-/*
-void timeAdjust(){
-        int digitSize = sizeof(digits)/sizeof(digits[0]);
-        count_time_adjust = (count_time_adjust+ 1) % digitSize;
-        display.clearDisplay();
-        display.setTextSize(0);
-        display.setFont(&FreeSansBold12pt7b);
-        display.setCursor(1,40);
-        display.print("20");
-        display.print(digits[count_time_adjust]);
-        display.print("0-01-01");
-        display.setCursor(1,40);
-        display.drawRect(27,20,15,23,WHITE);
-        display.display();
 
-}
-*/
-
-// int updateCountTimeRadix(int x_rect_value[], int &count_time_radix) {
-//     int digitSize = sizeof(x_rect_value) / sizeof(x_rect_value[0]);
-//     count_time_radix = (count_time_radix + 1) % digitSize;
-//     Serial.println(count_time_radix);
-
-//     display.clearDisplay();
-//     display.setCursor(1, 40);
-//     display.drawRect(x_rect_value[count_time_radix], 20, 15, 23, WHITE);
-//     display.display();
-
-//     return count_time_radix;
-// }
->>>>>>> feature/feature-timeOption-6.0
 
 void optionSetting(byte count_v, byte previousValue_v, byte nextValue_v){
       // display.drawBitmap(1,1,bitmap_icons[previousValue_v],16,16,1);
@@ -345,10 +325,7 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       if(count==0){
         //setted
         optionSetting(0,3,1);
-<<<<<<< HEAD
-=======
 
->>>>>>> feature/feature-timeOption-6.0
       }
       else if (count==1){
         //daily set
@@ -368,13 +345,6 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       
       
   };  
-<<<<<<< HEAD
-    if(digitalRead(ENTER_BUTTON)==LOW){
-     switch(count){
-      case 0:
-      //daily set
-      Serial.println(menu_options[count]);
-=======
     if(digitalRead(ENTER_BUTTON)==LOW && digitalRead(LED)==LOW){
      
       //Serial.println(menu_options[count]);
@@ -383,7 +353,6 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       //setted
       Serial.println(menu_options[count]);
       setted = true;
->>>>>>> feature/feature-timeOption-6.0
       
       break;
 
@@ -394,19 +363,11 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       break;
 
       case 2:
-<<<<<<< HEAD
-      yesNo = true;
-      buttonReady = false;
-      Serial.println(menu_options[count]);
-      digitalWrite(LED,HIGH);
-      Serial.println(buttonReady);
-=======
       yesNo=true;
       //confirmYesNo = false;
       // Serial.println(menu_options[count]);
       digitalWrite(LED,HIGH);
       // Serial.println(buttonReady);
->>>>>>> feature/feature-timeOption-6.0
       display.clearDisplay();
       display.setCursor(1,12); 
       display.print("Initialize all ti-ming data?");
@@ -426,11 +387,7 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       previousValue = 3;
       nextValue = 0;
       buttonReady = false;
-<<<<<<< HEAD
-      digitalWrite(LED,HIGH);
-=======
       //digitalWrite(LED,HIGH);
->>>>>>> feature/feature-timeOption-6.0
       display.drawRect(0,20,128,23,WHITE);
       displaySetting(count,previousValue,nextValue);
       Serial.print("yesNo:");
@@ -443,17 +400,14 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
     delay(10);
   };
 
-<<<<<<< HEAD
-  if(yesNo==true){
-    if (digitalRead(BUTTON)==LOW && yesNoChoose==true){
-=======
   if(setted==true){
 
   }
 
   if(yesNo==true){
+
     if (digitalRead(BUTTON)==LOW && yesNoChoose==true && initializeOption ==true){
->>>>>>> feature/feature-timeOption-6.0
+              Serial.println("進入yesNO模式");
     display.clearDisplay();
     display.setCursor(1,12); 
       display.print("Initialize all ti-ming data?");
@@ -462,24 +416,14 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       display.print("Yes");
       display.setCursor(70,57);
       display.print("No");
-<<<<<<< HEAD
-    Serial.println("yes!");
-    display.drawRect(0,40,40,23,WHITE);
-    yesNoChoose = false;
-=======
     display.drawRect(0,40,40,23,WHITE);
     yesNoChoose = false;
    
->>>>>>> feature/feature-timeOption-6.0
     display.display();
 
     }
 
-<<<<<<< HEAD
-    else if (digitalRead(BUTTON)==LOW&& yesNoChoose==false){
-=======
     else if (digitalRead(BUTTON)==LOW && yesNoChoose==false && initializeOption ==true){
->>>>>>> feature/feature-timeOption-6.0
       display.clearDisplay();
       display.setCursor(1,12); 
       display.print("Initialize all ti-ming data?");
@@ -491,24 +435,11 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       Serial.println("no");
       display.drawRect(60,40,40,23,WHITE);
       yesNoChoose = true;
-<<<<<<< HEAD
-=======
       
->>>>>>> feature/feature-timeOption-6.0
       display.display();
     }
     delay(50);
 
-<<<<<<< HEAD
-    if (digitalRead(ENTER_BUTTON)==LOW && yesNoChoose ==false){
-      Serial.println("You push the yes button.");
-    }
-
-    else if (digitalRead(ENTER_BUTTON)==LOW && yesNoChoose ==true){
-      Serial.println("You push the no button.");
-    }
-
-=======
     if (digitalRead(ENTER_BUTTON)==LOW && yesNoChoose ==false && initializeOption ==true){
       Serial.println("You push the yes button.");
       yesNo = false;
@@ -556,20 +487,17 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
   }
 
   if (adjustTime==true){
+
+
+
     initializeOption = false;
     display.clearDisplay();        
     display.setTextSize(0);
     display.setFont(&FreeSansBold12pt7b);
     
-    // display.print("20");
-    
-
-
-
-    
     if (digitalRead(ENTER_BUTTON)==LOW && digitalRead(LED)==HIGH && adjustTimeOption ==true && returnState == true){
       // int newCountTimeRadix = updateCountTimeRadix(x_rect, count_time_radix);
-
+    Serial.println("進入adjustTime模式");
       
       display.clearDisplay();
 
@@ -598,11 +526,14 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       display.print(setDate4);
       display.setFont(&FreeSansBold9pt7b);
       display.setCursor(1,60);
-      display.print("YES?");
+      display.print("YES");
       display.setCursor(70,60);
       display.print("NO");
+      display.drawRect(0,41.8,45,23,WHITE);
       adjustTimeOption = false;
       confirmReset = true;
+      chooseTimeSetting =true;
+      confirmResetOption = false;
 
 
       break;
@@ -653,11 +584,9 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
         display.print("-");
         display.print(setDate3);
         display.print("1");
+        // returnState = false;
 
       break;
-
-
-
            Serial.println(count_time_radix);
 
 
@@ -680,44 +609,356 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
         display.print(setDate4);
         display.setFont(&FreeSansBold9pt7b);
         display.setCursor(1,60);
-        display.print("YES?");
-        display.drawRect(0,41.8,50,23,WHITE);
+        display.print("YES");
+        display.drawRect(0,41.8,45,23,WHITE);
         display.setCursor(70,60);
-
         display.print("NO");
         display.display();
         confirmResetOption = false;
+        Serial.print("confirmResetOption:");
+        Serial.println(confirmResetOption);
     }
 
     else if (digitalRead(BUTTON)==LOW && digitalRead(LED)==HIGH && adjustTimeOption ==false && confirmReset==true &&  confirmResetOption==false){
-            display.clearDisplay();
+      display.clearDisplay();
       display.setCursor(1,40);
-           display.print("20");
-        display.print(setYear1);
-        display.print(setYear2);
-        display.print("-");
-        display.print(setDate1);
-        display.print(setDate2);
-        display.print("-");
-        display.print(setDate3);
-        display.print(setDate4);
-        display.setFont(&FreeSansBold9pt7b);
-        display.setCursor(1,60);
-        display.print("YES?");
-        
-        display.setCursor(70,60);
-        display.drawRect(69,41.8,32,23,WHITE);
-        display.print("NO");
-        display.display();
-        confirmResetOption = true;
+      display.print("20");
+      display.print(setYear1);
+      display.print(setYear2);
+      display.print("-");
+      display.print(setDate1);
+      display.print(setDate2);
+      display.print("-");
+      display.print(setDate3);
+      display.print(setDate4);
+      display.setFont(&FreeSansBold9pt7b);
+      display.setCursor(1,60);
+      display.print("YES"); 
+      display.setCursor(70,60);
+      display.drawRect(69,41.8,30,23,WHITE);
+      display.print("NO");
+      display.display();
+      confirmResetOption = true;
+
+      Serial.print("confirmResetOption:");
+      Serial.println(confirmResetOption);
     }
 
-    if(digitalRead(ENTER_BUTTON)==LOW && confirmResetOption ==false && adjustTimeOption == false){
+    if(digitalRead(ENTER_BUTTON)==LOW && confirmResetOption ==false && adjustTimeOption == false &&confirmReset ==true){
+      display.clearDisplay();
+      display.setCursor(1,25);
+      display.print("20");
+      display.print(setYear1);
+      display.print(setYear2);
+      display.print("-");
+      display.print(setDate1);
+      display.print(setDate2);
+      display.print("-");
+      display.print(setDate3);
+      display.print(setDate4);
+      display.setCursor(1,50);
+      display.print("00");
+      display.setCursor(35,50);
+      display.print(":");
+      display.setCursor(50,50);
+      display.print("00");
+      display.setCursor(80,50);
+            if(setTimeArray[2]==1){
+         display.setCursor(80,50);
+         display.print(periods[1]);
+      }
+
+      else{
+        display.setCursor(80,50);
+        display.print(periods[0]);
+      }
+      // display.drawRect(0,30,30,23,WHITE);
       Serial.println("Yes!");
-      adjustTiming = true;
+       setDateArray[0] = 2000+setYear1*10+setYear2;
+       setDateArray[1] = setDate1*10+setDate2;
+       setDateArray[2] = setDate3*10+setDate4;
+
+      Serial.print(setDateArray[0]);
+      Serial.print("-");
+      Serial.print( setDateArray[1]);
+      Serial.print("-");
+      Serial.println( setDateArray[2]);
+
+ 
+
+      // confirmReset = false;
+      adjustTimingOption = true;
+      adjustTiming=true;
+
+      confirmReset = false;
+      int digitSize = sizeof(x_rect) / sizeof(x_rect[0]);
+      count_time_radix = (count_time_radix + 1) % digitSize;
+      Serial.println(count_time_radix);
+
+      display.display();
+      count = 0;
+
     }
 
-    else if (digitalRead(ENTER_BUTTON)==LOW && confirmResetOption==true && adjustTimeOption == false){
+    if (digitalRead(ENTER_BUTTON)==LOW&& adjustTiming==true && adjustTimingOption==true){
+      count12 = 0;
+      
+      adjustTimingOption = false;
+      
+      display.clearDisplay();
+      display.setCursor(1,25);
+      display.print("20");
+      display.print(setYear1);
+      display.print(setYear2);
+      display.print("-");
+      display.print(setDate1);
+      display.print(setDate2);
+      display.print("-");
+      display.print(setDate3);
+      display.print(setDate4);
+      display.drawRect(50,30,30,23,WHITE);
+      display.setCursor(35,50);
+      display.print(":");
+      display.setCursor(50,50);
+      display.print("00");
+      display.setCursor(80,50);
+      if(setTimeArray[2]==1){
+         display.setCursor(80,50);
+         display.print(periods[1]);
+      }
+
+      else{
+        display.setCursor(80,50);
+        display.print(periods[0]);
+      }
+
+      
+      setTimeArray[0] = count;
+
+      Serial.println(setTimeArray[0]);
+      if(setTimeArray[0]<10){
+        display.setCursor(1,50);
+        display.print(0);
+        display.setCursor(15,50);
+        display.print(setTimeArray[0]);
+      }
+      else{
+        display.setCursor(1,50);
+        display.print(setTimeArray[0]);
+      }
+      display.display();
+      count = 0;
+
+      adjustTimingOption = false;
+
+
+    }
+
+    if (digitalRead(ENTER_BUTTON)==LOW&& adjustTiming==true && adjustTimingOption==false){
+      Serial.println("有走到這裡，adjustTiming==false");
+      display.setFont(&FreeSansBold9pt7b);
+      display.clearDisplay();
+      
+      display.setCursor(1,12);
+      display.print("Confirm the ti-me setting?");
+      display.setCursor(1,57);
+      display.print("Yes");
+      display.setCursor(70,57);
+      display.print("No");
+      
+
+      
+      display.display();
+
+      adjustTiming = false;
+      confirmAdjustTimingOption = true;
+  
+      
+
+
+
+      // setTimeArray[1] = count;
+      // display.clearDisplay();
+      // // display.setCursor(1,25);
+      // Serial.print(setDateArray[0]);
+      // Serial.print("-");
+      // Serial.print( setDateArray[1]);
+      // Serial.print("-");
+      // Serial.println( setDateArray[2]);
+      // Serial.print(setTimeArray[0]);
+      // Serial.print(":");
+      // Serial.print(setTimeArray[1]);
+      // if(setTimeArray[2]==1){
+      //    display.setCursor(80,50);
+      //    Serial.print(periods[1]);
+      // }
+
+      // else{
+      //   display.setCursor(80,50);
+      //   Serial.print(periods[0]);
+      // }
+
+      // display.display();
+
+    }
+
+    if (digitalRead(BUTTON)==LOW && adjustTiming == false && confirmAdjustTimingOption ==true){
+      display.setFont(&FreeSansBold9pt7b);
+      display.clearDisplay();
+      display.drawRect(0,40,40,23,WHITE);
+      display.setCursor(1,12);
+      display.print("Confirm the ti-me setting?");
+      display.setCursor(1,57);
+      display.print("Yes");
+      display.setCursor(70,57);
+      display.print("No");
+      display.display();
+      confirmAdjustTimingOption = false;
+
+    }
+
+    //  if (digitalRead(BUTTON)==LOW && adjustTiming == false && confirmAdjustTimingOption ==false){
+    //   display.setFont(&FreeSansBold9pt7b);
+    //   display.clearDisplay();
+    //   display.drawRect(60,40,40,23,WHITE);
+    //   display.setCursor(1,12);
+    //   display.print("Confirm the ti-me setting?");
+    //   display.setCursor(1,57);
+    //   display.print("Yes");
+    //   display.setCursor(70,57);
+    //   display.print("No");
+    //   display.display();
+    //   confirmAdjustTimingOption = true;
+    // }
+
+    if (digitalRead(BUTTON)==LOW  && adjustTiming==true && adjustTimingOption==true){
+      display.clearDisplay();
+      display.setCursor(1,25);
+      display.setCursor(1,25);
+      display.print("20");
+      display.print(setYear1);
+      display.print(setYear2);
+      display.print("-");
+      display.print(setDate1);
+      display.print(setDate2);
+      display.print("-");
+      display.print(setDate3);
+      display.print(setDate4);
+      
+      int arraySize = sizeof(timeArray)/sizeof(timeArray[0]);
+      count = ((count%12)+1);
+
+      if (count<10){
+        display.setCursor(1,50);
+        display.print(0);
+        display.setCursor(15,50);
+        display.println(count);
+      }
+      else{
+        display.setCursor(1,50);
+        display.print(count);
+      }
+
+      if (count==12){
+        count12++;
+        Serial.println(count12);
+        if(count12%2==1){
+          setTimeArray[2] = 1;
+        }else{
+          setTimeArray[2] = 0;
+        }
+      }
+
+
+      display.setCursor(35,50);
+      display.print(":");
+      display.setCursor(50,50);
+      display.print("00");
+
+
+      display.drawRect(0,30,30,23,WHITE);
+
+      if(setTimeArray[2]==1){
+         display.setCursor(80,50);
+         display.print(periods[1]);
+      }
+
+      else{
+        display.setCursor(80,50);
+        display.print(periods[0]);
+      }
+
+
+
+      display.display();
+
+      adjustTiming = true;
+
+      delay(10);
+
+
+
+    }
+    else if (digitalRead(BUTTON)==LOW && adjustTiming==true && adjustTimingOption==false){
+   
+      display.clearDisplay();
+      display.clearDisplay();
+      display.setCursor(1,25);
+      display.setCursor(1,25);
+      display.print("20");
+      display.print(setYear1);
+      display.print(setYear2);
+      display.print("-");
+      display.print(setDate1);
+      display.print(setDate2);
+      display.print("-");
+      display.print(setDate3);
+      display.print(setDate4);
+      if(setTimeArray[0]<10){
+        display.setCursor(1,50);
+        display.print(0);
+        display.setCursor(15,50);
+        display.print(setTimeArray[0]);
+      }
+      else{
+        display.setCursor(1,50);
+        display.print(setTimeArray[0]);
+      }
+
+      int arraySize = sizeof(timeArray)/sizeof(timeArray[0]);
+      count = (count + 1) % arraySize;
+      if(count<10){
+        display.setCursor(50,50);
+        display.print(0);
+        display.setCursor(65,50);
+        display.print(count);
+      }
+      else{
+        display.setCursor(50,50);
+        display.print(count);
+      }
+      display.drawRect(50,30,30,23,WHITE);
+      display.setCursor(35,50);
+      display.print(":");
+
+            if(setTimeArray[2]==1){
+         display.setCursor(80,50);
+         display.print(periods[1]);
+      }
+
+      else{
+        display.setCursor(80,50);
+        display.print(periods[0]);
+      }
+
+      display.display();
+ 
+
+    }
+
+
+
+    else if (digitalRead(ENTER_BUTTON)==LOW && confirmReset==true && confirmResetOption==true && adjustTimeOption == false){
       Serial.println("No");
     setYear1 = 0;
     setYear2 = 0;
@@ -737,9 +978,10 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
         display.print(setDate3);
         display.print(setDate4);
         display.display();
-    adjustTimeOption = true;
-    confirmReset = false;
+    adjustTimeOption =true;
     returnState = false;
+
+
     }
     
     if (digitalRead(BUTTON) == LOW && digitalRead(LED) == HIGH && adjustTimeOption == true) {
@@ -758,9 +1000,6 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
         display.drawRect(x_rect[count_time_radix],20,15,23,WHITE);
         display.print(setYear1);
         display.print("0-01-01");
-
-
-
         break;
 
         case 1:
@@ -770,9 +1009,6 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
         display.print(setYear1);
         display.print(setYear2);
         display.print("-01-01");
-        
-
-      
         break;
 
         case 2:
@@ -788,7 +1024,6 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
         display.print("1-01");
         Serial.print("setDate:");
         Serial.println(setDate1);
-      
         break;
 
         case 3:
@@ -811,18 +1046,22 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
         display.print(setDate1);
         display.print(setDate2);
         display.print("-01");
-       
         break;
 
         case 4:
         //十位數日期
         display.drawRect(x_rect[count_time_radix],20,15,23,WHITE);
         setDate3  = (setDate3 % (digitYearOption-1))+1;
-        if (setDate1 == 0 && setDate2 !=2){
+        if (setDate1 == 0  && setDate2 !=2){
+           setDate3 = (setDate3 % 4);
+        }
+
+        else if (setDate1 == 1){
           setDate3 = (setDate3 % 4);
-          // if(setDate3 ==0){
-          //   setDate3 = 3;
-          // }
+        }
+
+        else if (setDate2 ==2){
+          setDate3 = (setDate3) % 3;
         }
         display.print(setYear1);
         display.print(setYear2);
@@ -851,7 +1090,7 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
 
         //如果日期是1,2開頭，個位數會出現0~9
         else if (setDate3==1||setDate3==2){
-          setDate4  = (setDate4 % (digitYearOption-1));
+          setDate4  = (setDate4 % (digitYearOption-1))+1;
         }
 
         //如果是大月，並且日期十位數為3時，個位數要出現0或1
@@ -859,12 +1098,12 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
           setDate4 = (setDate4 +1)%2;
         }
 
-        else if (setDate3==3&&setDate1==1 &&setDate2==0||setDate2==2){
+        else if (setDate3==3&&setDate1==1 && setDate2==0||setDate2==2){
           setDate4 = (setDate4 +1)%2;
         }
 
         //如果是小月，並且日期十位數為3，個位數為0
-        else if(setDate3==3 && setDate1==1 && setDate2==4||setDate2==6||setDate2==9||setDate2==11){
+        else if(setDate3==3 && setDate1==1 && setDate2==4||setDate2==6||setDate2==9|| setDate1 ==1 && setDate2==1){
           setDate4 = 0;
         }
 
@@ -882,13 +1121,10 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       
       display.display();   
     }
-    delay(50);
+    delay(10);
     
     // int valueOfAdjustment = timeAdjustment();
-    
-
->>>>>>> feature/feature-timeOption-6.0
-
+  
 
   }
 
