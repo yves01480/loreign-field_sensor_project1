@@ -1,8 +1,10 @@
 #include "myDHT22.h"
 #include "mySSD1306.h"
+
 // #include "myClock.h"
 // #include "timeSetting.h"
 // #include "basicSetting.h"
+
 
 const byte BUTTON=33; // our button pin
 const byte ENTER_BUTTON = 25;
@@ -15,9 +17,10 @@ unsigned long finalTimeValue;
 unsigned long buttonPressStartTime = 0;
 const long interval = 3000;
 bool ledReady = false; // flag for when button is let go
-int count12;
-int setDateArray[3];
-int setTimeArray[3];
+int count24 = 0;
+int count12 = 0;
+int setDateArray[3] = {-1,-1,-1};
+int setTimeArray[4] = {-1,-1};
 int twoDigits[] ={0,1};
 int digits[] = {0,1,2,3,4,5,6,7,8,9};
 int ten_digits[] = {0,1,2,3,4,5,6,7,8,9};
@@ -47,6 +50,9 @@ int setHour2=0;
 int setMin1=0;
 int setMin2=0;
 int test;
+int hour;
+int secTest = 50;
+bool stopClock = false;
 bool enterAdjustTiming;
 bool setTiming;
 bool returnState;
@@ -83,6 +89,7 @@ bool chooseTimeSetting;
 bool confirmAdjustTimingOption;
 bool confirmAdjustTiming = false;
 bool confirmAdjustTiming_ENTER;
+bool buttonTURNenterOn;
 
 
 char menu_options [NUM_OPTIONS][MAX_OPTION_LENGTH] = {
@@ -162,15 +169,148 @@ void displaySetting(byte count_v,byte previousValue_v,byte nextValue_v){
 };
 
 void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
+ 
+if(stopClock==false){
+   DateTime now = rtc.now();   
+if (setDateArray[0] != -1 && setDateArray[1] != -1 && setTimeArray[0] != -1 && setTimeArray[1] != -1) {
+   
+    display.setTextSize(0);
+    display.clearDisplay();
+  
+
+    display.setCursor(30, 40);
+    display.println(":");
+    display.setCursor(70, 40);
+    display.println(":");
+
+    
+    if(now.hour()>12){ //處理下午時間 13~23
+      int hour12set = now.hour()-12;
+      display.setCursor(0, 40);
+      display.println(hour12set, DEC);
+      // Serial.println("now.hour()>12");
+
+    }
+    else if(now.hour()<12 && now.hour()!=0){ //處理午夜到上午時間 12~11
+      display.setCursor(0, 40);
+      display.print("0");
+      display.println(now.hour(),DEC);
+      // Serial.println("now.hour()<12 && now.hour()!=0");
+    }
+
+    else if(now.hour()==12){ 
+      display.setCursor(0, 40);
+      display.println(now.hour(), DEC);
+      // Serial.println("現在走now.hour()==0 && setTimeArray[2]==0");
+    }
+    
+    else if(now.hour()==0){
+      int hour12set = now.hour()+12;
+      display.setCursor(0,40);
+      display.println(hour12set ,DEC);
+      // Serial.println("現在走now.hour()==0");
+    }
+
+    
+    if(now.hour()==12 && now.minute()==0 && now.second()==0 || now.hour()==0 && now.minute()==0 && now.second()==0){     
+      count12 = count12+1;
+      Serial.print("count12:");
+      Serial.println(count12);
+      if(count12%2==1){
+          setTimeArray[2] = 1; //pm
+          Serial.println("現在應該要輸出pm");
+        }else{
+          setTimeArray[2] = 0; //am
+          Serial.println("現在應該要輸出am"); 
+          
+        }
+          delay(900);
+      }
+
+    if(setTimeArray[2]==0){
+      display.setCursor(80,55);
+      display.print(periods[0]); //am
+    }  
+      else{
+        display.setCursor(80,55);
+        display.print(periods[1]); //pm
+      }
+    
+    // display.setCursor(70,40);  
+    // display.println(setTimeArray[2]);
+
+    if(now.minute()<10){
+      display.setCursor(40, 40);
+      display.print("0");
+      display.println(now.minute(), DEC); 
+    }
+    else{
+      display.setCursor(40,40);
+      display.println(now.minute(),DEC);
+    }
+    
+    if(now.second()<10){
+    display.setCursor(80, 40);
+    display.print("0");
+    display.println(now.second(), DEC);
+    }
+    else{
+      display.setCursor(80,40);
+      display.println(now.second(),DEC);
+    }
+    
+          
+    display.setCursor(0, 20);
+    display.println(now.year(), DEC);
+
+    display.setCursor(55, 20);
+    display.println("-");
+
+    display.setCursor(85, 20);
+    display.println("-");
+     
+    display.setCursor(60, 20);
+    display.println(now.month(), DEC);
+       
+    display.setCursor(90, 20);
+    display.println(now.day(), DEC);
+
+
+if(count12%2==0){
+  count12 = 0;
+}
+else if (count12%2==1){
+  count12 = 1;
+}
+
+
+} else {
+    display.clearDisplay();
+    display.setTextColor(WHITE);
+    display.setTextSize(0); 
+    display.setFont(&FreeSansBold9pt7b);
+    display.setCursor(1, 15);
+    display.print("Push green button to set the timing.");
+}
+
+
+display.display();
+
+
+
+
+}
 
   // bool buttonReady = buttonCheck(BUTTON);
-  if (digitalRead(BUTTON)==0 && timeCheckMode != true && buttonReady !=true ) {
+  if (digitalRead(BUTTON)==0 && timeCheckMode != true && buttonReady !=true) {
+    display.clearDisplay();
+    stopClock = true;
     Serial.println("what");
     Serial.print("timeSetting:");
     Serial.println(timeSetting);
     Serial.print("buttonReady:");
     Serial.println(buttonReady);
-    display.clearDisplay();
+
     // Serial.print("timeCheckMode:");
     // Serial.println(timeCheckMode);
     digitalWrite(LED, HIGH);
@@ -604,7 +744,7 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
         display.print(setDate2);
         display.print("-");
         display.print(setDate3);
-        display.print("1");
+        display.print(setDate4);
         // returnState = false;
 
       break;
@@ -685,20 +825,27 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       display.print("00");
       display.setCursor(80,50);
 
-      if(setTimeArray[2]==1){
+      if(setTimeArray[2]==0){
          display.setCursor(80,50);
-         display.print(periods[1]);
+         display.print(periods[0]);
       }
 
       else{
         display.setCursor(80,50);
-        display.print(periods[0]);
+        display.print(periods[1]);
       }
       // display.drawRect(0,30,30,23,WHITE);
       Serial.println("Yes!");
-       setDateArray[0] = 2000+setYear1*10+setYear2;
-       setDateArray[1] = setDate1*10+setDate2;
-       setDateArray[2] = setDate3*10+setDate4;
+       int setYearFinal = 2000+setYear1*10+setYear2; 
+       Serial.println(setYearFinal);
+       int setMonthFinal = setDate1*10+setDate2;
+       Serial.println(setMonthFinal);
+       int setDateFinal = setDate3*10+setDate4;  
+       Serial.println(setDateFinal);
+
+       setDateArray[0] = setYearFinal;
+       setDateArray[1] = setMonthFinal;
+       setDateArray[2] = setDateFinal;
 
       Serial.print(setDateArray[0]);
       Serial.print("-");
@@ -723,7 +870,7 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
     }
 
     if (digitalRead(ENTER_BUTTON)==LOW&& adjustTiming==true && adjustTimingOption==true && enterAdjustTiming ==true){
-      count12 = 0;
+      //count12 = 0;
       
       adjustTimingOption = false;
       
@@ -744,19 +891,26 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       display.setCursor(50,50);
       display.print("00");
       display.setCursor(80,50);
-      if(setTimeArray[2]==1){
+      if(setTimeArray[2]==0){
+         setTimeArray[0] = count;
+         setTimeArray[3] = count;
          display.setCursor(80,50);
-         display.print(periods[1]);
+         display.print(periods[0]);
       }
 
       else{
+        count24 = count+12;
+        setTimeArray[3] = count24;
+        setTimeArray[0] = count;
+        Serial.print("24小時制：");
+        Serial.println(setTimeArray[3]);
         display.setCursor(80,50);
-        display.print(periods[0]);
+        display.print(periods[1]);
       }
 
       
-      setTimeArray[0] = count;
-
+      
+      Serial.print("確認時針：");
       Serial.println(setTimeArray[0]);
       if(setTimeArray[0]<10){
         display.setCursor(1,50);
@@ -769,6 +923,7 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
         display.print(setTimeArray[0]);
       }
       display.display();
+      count24 = 0;
       count = 0;
 
       adjustTimingOption = false;
@@ -776,8 +931,8 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
 
     }
 
-    if (digitalRead(ENTER_BUTTON)==LOW&& adjustTiming==true && adjustTimingOption==false){
-      Serial.println("有走到這裡，adjustTiming==false");
+    if (digitalRead(ENTER_BUTTON)==LOW&& adjustTiming==true && adjustTimingOption==false ){
+      Serial.println("adjustTiming==false");
       display.setFont(&FreeSansBold9pt7b);
       display.clearDisplay();
       
@@ -789,6 +944,7 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       display.print("No");   
       display.display();
 
+      
       adjustTiming = false;
       confirmAdjustTiming = true;
       // enterAdjustTiming = true;
@@ -813,7 +969,7 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       
       int arraySize = sizeof(timeArray)/sizeof(timeArray[0]);
       count = ((count%12)+1);
-
+      Serial.println(count);
       if (count<10){
         display.setCursor(1,50);
         display.print(0);
@@ -827,13 +983,20 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
 
       if (count==12){
         count12++;
+        Serial.print("count12:");
         Serial.println(count12);
         if(count12%2==1){
-          setTimeArray[2] = 1;
+          setTimeArray[2] = 1; //pm
         }else{
-          setTimeArray[2] = 0;
+          setTimeArray[2] = 0; //am
         }
+        Serial.print("count12%2:");
+        int count13 = count12%2;
+        Serial.println(count13);
       }
+
+      Serial.print("setTimeArray[2]:");
+      Serial.println(setTimeArray[2]);
 
 
       display.setCursor(35,50);
@@ -844,14 +1007,14 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
 
       display.drawRect(0,30,30,23,WHITE);
 
-      if(setTimeArray[2]==1){
+      if(setTimeArray[2]==0){
          display.setCursor(80,50);
-         display.print(periods[1]);
+         display.print(periods[0]); //am
       }
 
       else{
         display.setCursor(80,50);
-        display.print(periods[0]);
+        display.print(periods[1]); //pm
       }
 
 
@@ -909,14 +1072,14 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       display.setCursor(35,50);
       display.print(":");
 
-            if(setTimeArray[2]==1){
+            if(setTimeArray[2]==0){
          display.setCursor(80,50);
-         display.print(periods[1]);
+         display.print(periods[0]);
       }
 
       else{
         display.setCursor(80,50);
-        display.print(periods[0]);
+        display.print(periods[1]);
       }
 
       display.display();
@@ -1027,6 +1190,7 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
 
         else if (setDate1 == 1){
           setDate3 = (setDate3 % 4);
+          setDate4 = 0;
         }
 
         else if (setDate2 ==2){
@@ -1039,7 +1203,7 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
         display.print(setDate2);
         display.print("-");
         display.print(setDate3);
-        display.print("1");
+        display.print(setDate4);
        
         break;
 
@@ -1065,7 +1229,6 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
           test = (test+1) % 10;
           Serial.println(test);
           setDate4 = test;
-           Serial.println("現在範圍在0~9");
         }
 
         //如果是大月，並且日期十位數為3時，個位數要出現0或1
@@ -1111,10 +1274,11 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       confirmAdjustTimingOption = false;
       confirmAdjustTiming = true;
       confirmAdjustTiming_ENTER = true;
+      buttonTURNenterOn = true;
 
     }
 
-     if (digitalRead(BUTTON)==LOW && adjustTiming == false && confirmAdjustTiming ==true && confirmAdjustTimingOption ==false){
+     if (digitalRead(BUTTON)==LOW && adjustTiming == false && confirmAdjustTiming ==true && confirmAdjustTimingOption ==false ){
       display.setFont(&FreeSansBold9pt7b);
       display.clearDisplay();
       display.drawRect(60,40,40,23,WHITE);
@@ -1127,18 +1291,90 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       display.display();
       confirmAdjustTimingOption = true;
       confirmAdjustTiming_ENTER = false;
+      buttonTURNenterOn = true;
       // confirmAdjustTiming = false;
     }
 
-    if (digitalRead(ENTER_BUTTON)==LOW && adjustTiming ==false && confirmAdjustTiming ==true && confirmAdjustTiming_ENTER == false){
- //     count = 0;
+    if (digitalRead(ENTER_BUTTON)==LOW && adjustTiming == false && confirmAdjustTiming ==true && confirmAdjustTiming_ENTER == false && buttonTURNenterOn == true){
+      Serial.println("NoNo");  
+      display.clearDisplay();
+      display.setCursor(1,25);
+      display.setCursor(1,25);
+      display.print("20");
+      display.print(setYear1);
+      display.print(setYear2);
+      display.print("-");
+      display.print(setDate1);
+      display.print(setDate2);
+      display.print("-");
+      display.print(setDate3);
+      display.print(setDate4);
+/*      
+      if (count<10){
+        display.setCursor(1,50);
+        display.print(0);
+        display.setCursor(15,50);
+        display.println(count);
+      }
+      else{
+        display.setCursor(1,50);
+        display.print(count);
+      }
+
+      if (count==12){
+        count12++;
+        Serial.println(count12);
+        if(count12%2==1){
+          setTimeArray[2] = 1;
+        }else{
+          setTimeArray[2] = 0;
+        }
+      }
+*/      
+      display.setCursor(1,50);
+      display.print("00");
+      display.setCursor(35,50);
+      display.print(":");
+      display.setCursor(50,50);
+      display.print("00");
+      display.setCursor(80,50);
+      display.print(periods[0]);
+
+
+      display.drawRect(0,30,30,23,WHITE);
+/*
+      if(setTimeArray[2]==1){
+         display.setCursor(80,50);
+         display.print(periods[1]);
+      }
+
+      else{
+        display.setCursor(80,50);
+        display.print(periods[0]);
+      }
+*/
+
+      adjustTiming=true;
+      adjustTimingOption=true;
+      display.display();
+      count = 0;
+      //count12 = 0;
+      buttonTURNenterOn = false;
+
+
+
+      delay(10);
+
+ 
     }
  
     if (digitalRead(ENTER_BUTTON)==LOW && adjustTiming ==false && confirmAdjustTiming == true && confirmAdjustTiming_ENTER ==true){
 
       Serial.println("This will run RTC Sensor finally.");
+      Serial.print("count12:");
+      Serial.println(count12);
       digitalWrite(LED,LOW);
-      Serial.println(digitalRead(LED));
+      // Serial.println(digitalRead(LED));
       setTimeArray[1] = count;
       display.clearDisplay();
       // display.setCursor(1,25);
@@ -1150,14 +1386,14 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       Serial.print(setTimeArray[0]);
       Serial.print(":");
       Serial.print(setTimeArray[1]);
-      if(setTimeArray[2]==1){
+      if(setTimeArray[2]==0){
          display.setCursor(80,50);
-         Serial.print(periods[1]);
+         Serial.println(periods[0]); //am
       }
 
       else{
         display.setCursor(80,50);
-        Serial.print(periods[0]);
+        Serial.println(periods[1]); //pm
       }
 
       display.display();
@@ -1175,8 +1411,16 @@ void ledCheck(byte BUTTON, unsigned long currentMillis, byte ENTER_BUTTON){
       returnState = false;
       enterAdjustTiming = false;
       count_time_radix = 0;
-
+      //count12 = 0;
       count = 0;
+      stopClock = false;
+      timeSetting = false;
+      buttonTURNenterOn == false;
+      DateTime newTime(setDateArray[0],setDateArray[1],setDateArray[2],setTimeArray[3],setTimeArray[1],secTest);
+      rtc.adjust(newTime);
+
+   
+
 
     }
 
