@@ -12,6 +12,8 @@
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 
+RTC_DS1307 rtc;
+
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 
@@ -199,14 +201,4 @@ const unsigned char* epd_bitmap_60X60[4] = {
   epd_bitmap_icon_cloud2,
   epd_bitmap_icon_rain,
   epd_bitmap_icon_sun
-};
-
-
-void setRTCManually(){
-  display.clearDisplay();
-  display.setTextSize(0);
-  display.setFont(&FreeSansBold12pt7b);
-  display.setCursor(1,40);
-  display.print("2023-01-01");
-  display.display();
 };

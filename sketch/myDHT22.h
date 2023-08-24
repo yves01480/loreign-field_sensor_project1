@@ -1,5 +1,5 @@
 #include "DHTesp.h"
-const int DHT_PIN =26;
+const int DHT_PIN =32;
 
 float temp, humid;
 
