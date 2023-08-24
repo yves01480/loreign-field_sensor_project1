@@ -1,6 +1,6 @@
 #include "myDHT22.h"
 #include "mySSD1306.h"
-
+#include "dailySet.h"
 // #include "myClock.h"
 // #include "timeSetting.h"
 // #include "basicSetting.h"
@@ -90,6 +90,7 @@ bool confirmAdjustTimingOption;
 bool confirmAdjustTiming = false;
 bool confirmAdjustTiming_ENTER;
 bool buttonTURNenterOn;
+
 
 
 char menu_options [NUM_OPTIONS][MAX_OPTION_LENGTH] = {
@@ -187,6 +188,7 @@ if (setDateArray[0] != -1 && setDateArray[1] != -1 && setTimeArray[0] != -1 && s
     if(now.hour()>12){ //處理下午時間 13~23
       int hour12set = now.hour()-12;
       display.setCursor(0, 40);
+      display.print("0");
       display.println(hour12set, DEC);
       // Serial.println("now.hour()>12");
 
@@ -257,9 +259,7 @@ if (setDateArray[0] != -1 && setDateArray[1] != -1 && setTimeArray[0] != -1 && s
     else{
       display.setCursor(80,40);
       display.println(now.second(),DEC);
-    }
-    
-          
+    }      
     display.setCursor(0, 20);
     display.println(now.year(), DEC);
 
@@ -269,11 +269,27 @@ if (setDateArray[0] != -1 && setDateArray[1] != -1 && setTimeArray[0] != -1 && s
     display.setCursor(85, 20);
     display.println("-");
      
-    display.setCursor(60, 20);
-    display.println(now.month(), DEC);
+    if(now.month()<10){
+      display.setCursor(60, 20);
+      display.print("0");
+      display.println(now.month(), DEC);  
+    }else{
+      display.setCursor(60, 20);
+      display.print("0");
+      display.println(now.month(), DEC);  
+    }
+    
+    if(now.day()<10){
+      display.setCursor(90, 20);
+      display.print("0");
+      display.println(now.day(), DEC);
+    }
+    else{
+      display.setCursor(90,20);
+      display.println(now.day(), DEC);
+    }
        
-    display.setCursor(90, 20);
-    display.println(now.day(), DEC);
+    
 
 
 if(count12%2==0){
@@ -504,7 +520,9 @@ display.display();
       break;
 
       case 1:
+      //dailySet
       Serial.println(menu_options[count]);
+      dailySet(BUTTON);
 
 
       break;
@@ -530,6 +548,7 @@ display.display();
       case 3:
       Serial.println(menu_options[count]);
       display.clearDisplay();
+      digitalWrite(LED,HIGH);
       timeSetting = false;
       count = 4 ;
       previousValue = 3;
